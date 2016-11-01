@@ -27,10 +27,6 @@ public class SlickSimpleWeb {
         return client.target(url);
     }
 
-    public static TestRun createTestRun(TestRun testRun) {
-
-    }
-
 
 //    public static SlickFileMetadata getFileId(String resultId, SlickFileMetadata data) {
 //        WebTarget target = getTarget().path("/api/simple/result/" + resultId + "/create_file");

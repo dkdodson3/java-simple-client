@@ -1,39 +1,43 @@
 package com.slickqa.client.simple.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.slickqa.client.simple.SlickSimpleClient;
-import com.slickqa.client.simple.definitions.Result;
-import com.slickqa.client.simple.definitions.SlickFile;
-import com.slickqa.client.simple.definitions.SlickLog;
 import com.slickqa.client.simple.definitions.TestRun;
-import com.slickqa.client.simple.utils.JsonUtil;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 
 /**
  * Created by Keith on 10/26/16.
  */
 public class SlickSimpleClientImpl implements SlickSimpleClient {
+    private final String mediaType = MediaType.APPLICATION_JSON;
     private final WebTarget target;
 
     public SlickSimpleClientImpl(String baseUrl, Client restClient) {
-        this.target = restClient.target(baseUrl);
+        WebTarget target = restClient.target(baseUrl);
+        this.target = target;
     }
 
     @Override
     public TestRun createTestRun(TestRun testRun) {
-        target.path("/api/simple/create_test_run/");
-        Entity entityData = Entity.entity(testRun, MediaType.APPLICATION_JSON);
-        Response response = target.request(MediaType.APPLICATION_JSON).post(entityData);
-        TestRun result = response.readEntity(TestRun.class);
-        return result;
+        String path = "/api/simple/create_test_run";
+
+        Entity entityData = testRun.toEntity(mediaType);
+
+        WebTarget currentTarget = this.target.path(path);
+        Invocation.Builder request = currentTarget.request(mediaType);
+        Response response = request.post(entityData);
+
+        if ( response == null || response.getStatus() < 200 || response.getStatus() >= 300 ) {
+            return null;
+        }
+
+        Entity entity = (Entity) response.getEntity();
+        TestRun retTestRun = TestRun.fromEntity(entity);
+        return retTestRun;
     }
+
 //
 //    @Override
 //    public ArrayList<Result> sendResults(String testRunId, ArrayList<Result> results) {
@@ -77,5 +81,5 @@ public class SlickSimpleClientImpl implements SlickSimpleClient {
 ////    sb.append("  id: ").append(id).append("\n");
 ////    sb.append("  md5: ").append(md5).append("\n")
 
-    }
+//    }
 }
