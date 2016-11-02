@@ -3,12 +3,12 @@ package com.slickqa.client.simple.definitions;
 /**
  * Created by Keith on 10/25/16.
  */
-public class Result {
+public class SlickResult {
     private final String resultId;
     private final String status;
-    private final TestCase testCase;
+    private final SlickTestCase testCase;
 
-    public Result(String resultId, String status, TestCase testCase) {
+    public SlickResult(String resultId, String status, SlickTestCase testCase) {
         this.resultId = resultId;
         this.status = status;
         this.testCase = testCase;
@@ -22,7 +22,7 @@ public class Result {
         return this.status;
     }
 
-    public TestCase getTestCase() {
+    public SlickTestCase getTestCase() {
         return this.testCase;
     }
 

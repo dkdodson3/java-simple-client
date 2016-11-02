@@ -1,5 +1,7 @@
 package com.slickqa.client.simple.definitions;
 
+import lombok.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +11,9 @@ public class TestRunBuilder {
     private SlickIdentity build;
     private SlickIdentity testPlan;
     private SlickIdentity testRun;
-    private List<Result> results;
+    private List<SlickResult> results;
 
-    public TestRunBuilder addProject(SlickIdentity project) {
+    public TestRunBuilder addProject(@NonNull SlickIdentity project) {
         this.project = project;
         return this;
     }
@@ -37,7 +39,7 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRunBuilder addResult(Result result) {
+    public TestRunBuilder addResult(SlickResult result) {
         if (this.results == null) {
             this.results = new ArrayList<>();
         }
@@ -46,7 +48,7 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRunBuilder addResults(List<Result> results) {
+    public TestRunBuilder addResults(List<SlickResult> results) {
         if (this.results == null) {
             this.results = new ArrayList<>();
         }
@@ -55,7 +57,7 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRun build() {
-        return TestRun.createTestRun(project, release, build, testPlan, testRun, results);
+    public SlickTestRun build() {
+        return new SlickTestRun(project, release, build, testPlan, testRun, results);
     }
 }

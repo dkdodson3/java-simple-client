@@ -1,11 +1,15 @@
 package com.slickqa.client.simple.impl;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.slickqa.client.simple.SlickSimpleClient;
-import com.slickqa.client.simple.definitions.TestRun;
+import com.slickqa.client.simple.definitions.SlickLog;
+import com.slickqa.client.simple.definitions.SlickTestRun;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.ws.http.HTTPException;
 
 /**
  * Created by Keith on 10/26/16.
@@ -20,8 +24,12 @@ public class SlickSimpleClientImpl implements SlickSimpleClient {
     }
 
     @Override
-    public TestRun createTestRun(TestRun testRun) {
+    public SlickTestRun addTestRun(SlickTestRun testRun) {
         String path = "/api/simple/create_test_run";
+
+        if (Strings.isNullOrEmpty(testRun.getProject().getId()) && Strings.isNullOrEmpty(testRun.getProject().getName())) {
+            throw new IllegalArgumentException("Project Name and Id cannot both be empty");
+        }
 
         Entity entityData = testRun.toEntity(mediaType);
 
@@ -30,17 +38,39 @@ public class SlickSimpleClientImpl implements SlickSimpleClient {
         Response response = request.post(entityData);
 
         if ( response == null || response.getStatus() < 200 || response.getStatus() >= 300 ) {
-            return null;
+            throw new HTTPException(response.getStatus());
         }
 
         Entity entity = (Entity) response.getEntity();
-        TestRun retTestRun = TestRun.fromEntity(entity);
+        SlickTestRun retTestRun = SlickTestRun.fromEntity(entity);
         return retTestRun;
+    }
+
+    @Override
+    public void addLogs(SlickLog slickLog) {
+        if (Strings.isNullOrEmpty(slickLog.getResultId())) {
+            throw new IllegalArgumentException("ResultId is null or empty");
+        }
+
+        if (slickLog.getLogs() == null || slickLog.getLogs().size() < 1) {
+            throw new IllegalArgumentException("Logs are null or empty");
+        }
+
+        String path = "/api/simple/result/" + slickLog.getResultId();
+
+        Entity entityData = slickLog.toEntity(mediaType);
+        WebTarget currentTarget = this.target.path(path);
+        Invocation.Builder request = currentTarget.request(mediaType);
+        Response response = request.post(entityData);
+
+        if ( response == null || response.getStatus() < 200 || response.getStatus() >= 300 ) {
+            throw new HTTPException(response.getStatus());
+        }
     }
 
 //
 //    @Override
-//    public ArrayList<Result> sendResults(String testRunId, ArrayList<Result> results) {
+//    public ArrayList<SlickResult> sendResults(String testRunId, ArrayList<SlickResult> results) {
 //        return null;
 //    }
 //

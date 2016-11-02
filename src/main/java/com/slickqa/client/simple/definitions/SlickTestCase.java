@@ -1,12 +1,14 @@
 package com.slickqa.client.simple.definitions;
 
+import lombok.NonNull;
+
 import java.util.List;
 
 /**
  * Created by Keith on 10/25/16.
  */
 
-public class TestCase {
+public class SlickTestCase {
     private final String testCaseId;
     private final String component;
     private final String feature;
@@ -17,15 +19,15 @@ public class TestCase {
     private final List<String> steps;
     private final List<String> expectations;
 
-    public TestCase(String testCaseId,
-                    String component,
-                    String feature,
-                    String automationId,
-                    String automationKey,
-                    String automationTool,
-                    String testTitle,
-                    List<String> steps,
-                    List<String> expectations) {
+    public SlickTestCase(String testCaseId,
+                         String component,
+                         String feature,
+                         String automationId,
+                         String automationKey,
+                         String automationTool,
+                         @NonNull String testTitle,
+                         List<String> steps,
+                         List<String> expectations) {
         this.testCaseId = testCaseId;
         this.component = component;
         this.feature = feature;

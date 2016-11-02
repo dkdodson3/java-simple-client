@@ -3,7 +3,7 @@ package com.slickqa.client.simple.definitions;
 public class ResultBuilder {
     private String resultId;
     private String status;
-    private TestCase testCase;
+    private SlickTestCase testCase;
 
     public ResultBuilder addResultId(String resultId) {
         this.resultId = resultId;
@@ -15,12 +15,12 @@ public class ResultBuilder {
         return this;
     }
 
-    public ResultBuilder addTestCase(TestCase testCase) {
+    public ResultBuilder addTestCase(SlickTestCase testCase) {
         this.testCase = testCase;
         return this;
     }
 
-    public Result build() {
-        return new Result(resultId, status, testCase);
+    public SlickResult build() {
+        return new SlickResult(resultId, status, testCase);
     }
 }

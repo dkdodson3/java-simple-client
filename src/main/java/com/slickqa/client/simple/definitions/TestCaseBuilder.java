@@ -1,5 +1,7 @@
 package com.slickqa.client.simple.definitions;
 
+import lombok.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +46,7 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCaseBuilder addTestTitle(String testTitle) {
+    public TestCaseBuilder addTestTitle(@NonNull String testTitle) {
         this.testTitle = testTitle;
         return this;
     }
@@ -85,7 +87,7 @@ public class TestCaseBuilder {
         return this;
     }
 
-    public TestCase build() {
-        return new TestCase(testCaseId, component, feature, automationId, automationKey, automationTool, testTitle, steps, expectations);
+    public SlickTestCase build() {
+        return new SlickTestCase(testCaseId, component, feature, automationId, automationKey, automationTool, testTitle, steps, expectations);
     }
 }

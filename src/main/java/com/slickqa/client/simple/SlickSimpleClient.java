@@ -1,17 +1,19 @@
 package com.slickqa.client.simple;
 
-import com.slickqa.client.simple.definitions.TestRun;
+import com.slickqa.client.simple.definitions.SlickLog;
+import com.slickqa.client.simple.definitions.SlickTestRun;
 
 /**
  * Created by Keith on 10/26/16.
  */
 public interface SlickSimpleClient {
 
-    public TestRun createTestRun(TestRun testRun);
+    public SlickTestRun addTestRun(SlickTestRun testRun);
 
-//    public ArrayList<Result> sendResults(String testRunId, ArrayList<Result> results);
+//    public ArrayList<SlickResult> addResults(String testRunId, ArrayList<SlickResult> results);
 //
-//    public void sendLog(String resultId, SlickLog slickLog);
-//
-//    public void sendFile(String resultId, SlickFile slickFile);
+    public void addLogs(SlickLog slickLog);
+
+//    public void addFiles(ArrayList<SlickFile> slickFiles);
+
 }

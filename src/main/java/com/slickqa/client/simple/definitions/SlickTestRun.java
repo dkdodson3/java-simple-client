@@ -1,5 +1,7 @@
 package com.slickqa.client.simple.definitions;
 
+import lombok.NonNull;
+
 import javax.ws.rs.client.Entity;
 import java.util.List;
 
@@ -7,20 +9,20 @@ import java.util.List;
  * Created by Keith on 10/25/16.
  */
 
-public class TestRun {
+public class SlickTestRun {
     private final SlickIdentity project;
     private final SlickIdentity release;
     private final SlickIdentity build;
     private final SlickIdentity testPlan;
     private final SlickIdentity testRun;
-    private final List<Result> results;
+    private final List<SlickResult> results;
 
-    private TestRun(SlickIdentity project,
-                    SlickIdentity release,
-                    SlickIdentity build,
-                    SlickIdentity testPlan,
-                    SlickIdentity testRun,
-                    List<Result> results) {
+    public SlickTestRun(@NonNull SlickIdentity project,
+                        SlickIdentity release,
+                        SlickIdentity build,
+                        SlickIdentity testPlan,
+                        SlickIdentity testRun,
+                        List<SlickResult> results) {
         this.project = project;
         this.release = release;
         this.build = build;
@@ -32,6 +34,7 @@ public class TestRun {
     public SlickIdentity getProject() {
         return this.project;
     }
+
     public SlickIdentity getRelease() {
         return this.release;
     }
@@ -48,7 +51,7 @@ public class TestRun {
         return this.testRun;
     }
 
-    public List<Result> getResults() {
+    public List<SlickResult> getResults() {
         return this.results;
     }
 
@@ -56,8 +59,8 @@ public class TestRun {
         return Entity.entity(this, mediaType);
     }
 
-    public static TestRun fromEntity(Entity entity) {
-        return (TestRun) entity.getEntity();
+    public static SlickTestRun fromEntity(Entity entity) {
+        return (SlickTestRun) entity.getEntity();
     }
 
     public static TestRunBuilder builder() {

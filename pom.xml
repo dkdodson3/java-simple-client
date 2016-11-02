@@ -196,7 +196,12 @@
       <version>17.0</version>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>-->
+      <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+          <version>RELEASE</version>
+      </dependency>
+      <!--<dependency>-->
       <!--<groupId>com.google.truth</groupId>-->
       <!--<artifactId>truth</artifactId>-->
       <!--<version>0.25</version>-->
