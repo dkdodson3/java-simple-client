@@ -1,5 +1,6 @@
 package com.slickqa.client.simple.definitions;
 
+import com.google.common.base.Strings;
 import lombok.NonNull;
 
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.List;
  */
 
 public class SlickTestCase {
-    private final String testCaseId;
     private final String component;
     private final String feature;
     private final String automationId;
@@ -19,16 +19,21 @@ public class SlickTestCase {
     private final List<String> steps;
     private final List<String> expectations;
 
-    public SlickTestCase(String testCaseId,
-                         String component,
+    public final static String MESSAGE_EMPTY_AUTOMATION = "Must have either automationId or automationKey";
+
+    public SlickTestCase(String component,
                          String feature,
                          String automationId,
                          String automationKey,
-                         String automationTool,
+                         @NonNull String automationTool,
                          @NonNull String testTitle,
                          List<String> steps,
                          List<String> expectations) {
-        this.testCaseId = testCaseId;
+
+        if (Strings.isNullOrEmpty(automationId) && Strings.isNullOrEmpty(automationKey)) {
+            throw new IllegalArgumentException(MESSAGE_EMPTY_AUTOMATION);
+        }
+
         this.component = component;
         this.feature = feature;
         this.automationId = automationId;
@@ -37,10 +42,6 @@ public class SlickTestCase {
         this.testTitle = testTitle;
         this.steps = steps;
         this.expectations = expectations;
-    }
-
-    public String getTestCaseId() {
-        return testCaseId;
     }
 
     public String getComponent() {
@@ -75,8 +76,8 @@ public class SlickTestCase {
         return expectations;
     }
 
-    public static TestCaseBuilder builder() {
-        return new TestCaseBuilder();
+    public static SlickTestCaseBuilder builder() {
+        return new SlickTestCaseBuilder();
     }
 
 }

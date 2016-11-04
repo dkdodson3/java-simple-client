@@ -8,12 +8,12 @@ import lombok.NonNull;
 public class SlickFile {
     private final String resultId;
     private final String filePath;
-    private final String name;
+    private final SlickIdentity identity;
 
-    public SlickFile(@NonNull String resultId, @NonNull String filePath, String name) {
+    public SlickFile(@NonNull String resultId, @NonNull String filePath, @NonNull SlickIdentity identity) {
         this.resultId = resultId;
         this.filePath = filePath;
-        this.name = name;
+        this.identity = identity;
     }
 
     public String getResultId() {
@@ -24,8 +24,8 @@ public class SlickFile {
         return filePath;
     }
 
-    public String getName() {
-        return name;
+    public SlickIdentity getIdentity() {
+        return identity;
     }
 
     public static SlickFileBuilder builder() {

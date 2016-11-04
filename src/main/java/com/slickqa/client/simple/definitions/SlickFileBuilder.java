@@ -5,24 +5,24 @@ import lombok.NonNull;
 public class SlickFileBuilder {
     private String resultId;
     private String filePath;
-    private String name;
+    private SlickIdentity identity;
 
-    public SlickFileBuilder addResultId(@NonNull String resultId) {
+    public SlickFileBuilder addResultId(String resultId) {
         this.resultId = resultId;
         return this;
     }
 
-    public SlickFileBuilder addFilePath(@NonNull String filePath) {
+    public SlickFileBuilder addFilePath(String filePath) {
         this.filePath = filePath;
         return this;
     }
 
-    public SlickFileBuilder addName(String name) {
-        this.name = name;
+    public SlickFileBuilder addIdentity(SlickIdentity identity) {
+        this.identity = identity;
         return this;
     }
 
     public SlickFile build() {
-        return new SlickFile(resultId, filePath, name);
+        return new SlickFile(resultId, filePath, identity);
     }
 }

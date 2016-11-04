@@ -1,12 +1,11 @@
 package com.slickqa.client.simple.impl;
 
+import com.google.common.collect.Lists;
 import com.slickqa.client.simple.SlickSimpleClientFactory;
 import com.slickqa.client.simple.definitions.*;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.integration.junit4.JMockit;
-import mockit.internal.state.TestRun;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,7 +34,13 @@ public class SlickSimpleClientTest {
     WebTarget targetTwo;
 
     @Injectable
-    Invocation.Builder targetBuilder;
+    WebTarget targetThree;
+
+    @Injectable
+    Invocation.Builder targetBuilderOne;
+
+    @Injectable
+    Invocation.Builder targetBuilderTwo;
 
     @Test
     public void initializeClientWithoutClient() {
@@ -46,45 +51,33 @@ public class SlickSimpleClientTest {
         assertThat(simpleClient, instanceOf(SlickSimpleClientImpl.class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void getTestRunNoProjectName() {
-        final String mediaType = MediaType.APPLICATION_JSON;
-        final String baseUrl = "http://localhost/slick";
-        final String path = "/api/simple/create_test_run";
-
-        SlickIdentity testProject = new SlickIdentity(null, null);
-        SlickTestRun testRun = SlickTestRun.builder().addProject(testProject).build();
-        SlickSimpleClientImpl simpleClient = SlickSimpleClientFactory.getSlickSimpleClient(baseUrl, restClient);
-        try {
-            simpleClient.addTestRun(testRun);
-        } catch (IllegalArgumentException e) {
-            assertEquals(e.getMessage(), "Project Name and Id cannot both be empty");
-            throw e;
-        }
-
-    }
-
     @Test
-    public void getTestRunValidData() {
+    public void createTestRun() {
         final String mediaType = MediaType.APPLICATION_JSON;
         final String baseUrl = "http://localhost/slick";
-        final String path = "/api/simple/create_test_run";
+        final String path = SlickSimpleClientImpl.CREATE_TEST_RUN_PATH;
 
         String projectName = "foo";
-        String projectId = "1234-BOB";
+        SlickIdentity testProject = new SlickIdentity(projectName, null);
+        SlickTestCase testCaseOne = SlickTestCase.builder()
+                .addTestTitle("bar")
+                .addAutomationId("foo")
+                .addAutomationTool("blah")
+                .addSteps(Lists.newArrayList("step"))
+                .addExpectations(Lists.newArrayList("expectation"))
+                .build();
+        SlickIdentity identity = new SlickIdentity("BLAH", "1234");
+        SlickResult resultOne = SlickResult.builder().addIdentity(identity).addTestCase(testCaseOne).build();
+        SlickTestRun testRun = new SlickTestRunBuilder().addResult(resultOne).addProject(testProject).build();
 
+
+        String projectId = "1234-BOB";
         String testRunName = "bar";
         String testRunId = "1234-FRANK";
-
-        SlickIdentity testProject = new SlickIdentity(projectName, null);
-        SlickTestRun testRun = new TestRunBuilder().addProject(testProject).build();
-
-
         SlickIdentity testProjectRet = new SlickIdentity(projectName, projectId);
         SlickIdentity testRunRet = new SlickIdentity(testRunName, testRunId);
-        SlickTestRun testRunRetValue = SlickTestRun.builder().addTestRun(testRunRet).addProject(testProjectRet).build();
-
-        final Entity entityDataRet = testRunRetValue.toEntity(mediaType);
+        SlickTestRun testRunRetValue = SlickTestRun.builder().addTestRun(testRunRet).addResult(resultOne).addProject(testProjectRet).build();
+        final Entity entityDataRet = Entity.entity(testRunRetValue, mediaType);
         final Response response = Response.status(200).type(mediaType).entity(entityDataRet).build();
 
         new Expectations() {{
@@ -95,9 +88,9 @@ public class SlickSimpleClientTest {
             result = targetTwo;
 
             targetTwo.request(mediaType);
-            result = targetBuilder;
+            result = targetBuilderOne;
 
-            targetBuilder.post((Entity) any);
+            targetBuilderOne.post((Entity) any);
             result = response;
         }};
 
@@ -107,25 +100,31 @@ public class SlickSimpleClientTest {
     }
 
     @Test(expected = HTTPException.class)
-    public void getTestRunBadStatus() {
+    public void createTestRunBadStatus() {
         final String mediaType = MediaType.APPLICATION_JSON;
         final String baseUrl = "http://localhost/slick";
-        final String path = "/api/simple/create_test_run";
+        final String path = SlickSimpleClientImpl.CREATE_TEST_RUN_PATH;
 
         String projectName = "foo";
-        String projectId = "1234-BOB";
+        SlickTestCase testCaseOne = SlickTestCase.builder()
+                .addTestTitle("bar")
+                .addAutomationId("foo")
+                .addAutomationTool("blah")
+                .addSteps(Lists.newArrayList("step"))
+                .addExpectations(Lists.newArrayList("expectation"))
+                .build();
+        SlickIdentity identity = new SlickIdentity("BLAH", "1234");
+        SlickResult resultOne = SlickResult.builder().addIdentity(identity).addTestCase(testCaseOne).build();
+        SlickIdentity testProject = new SlickIdentity(projectName, null);
+        SlickTestRun testRun = SlickTestRun.builder().addResult(resultOne).addProject(testProject).build();
 
+        String projectId = "1234-BOB";
         String testRunName = "bar";
         String testRunId = "1234-FRANK";
-
-        SlickIdentity testProject = new SlickIdentity(projectName, null);
-        SlickTestRun testRun = SlickTestRun.builder().addProject(testProject).build();
-
         SlickIdentity testProjectRet = new SlickIdentity(projectName, projectId);
         SlickIdentity testRunRet = new SlickIdentity(testRunName, testRunId);
-        SlickTestRun testRunRetValue = SlickTestRun.builder().addTestRun(testRunRet).addProject(testProjectRet).build();
-
-        final Entity entityDataRet = testRunRetValue.toEntity(mediaType);
+        SlickTestRun testRunRetValue = SlickTestRun.builder().addTestRun(testRunRet).addProject(testProjectRet).addResult(resultOne).build();
+        final Entity entityDataRet = Entity.entity(testRunRetValue, mediaType);
         final Response response = Response.status(301).type(mediaType).entity(entityDataRet).build();
 
         new Expectations() {{
@@ -136,9 +135,9 @@ public class SlickSimpleClientTest {
             result = targetTwo;
 
             targetTwo.request(mediaType);
-            result = targetBuilder;
+            result = targetBuilderOne;
 
-            targetBuilder.post((Entity) any);
+            targetBuilderOne.post((Entity) any);
             result = response;
         }};
 
@@ -149,58 +148,43 @@ public class SlickSimpleClientTest {
             assertEquals(e.getStatusCode(), 301);
             throw e;
         }
-
     }
 
     @Test
     public void getTestRunValidDataWithResults() {
         final String mediaType = MediaType.APPLICATION_JSON;
         final String baseUrl = "http://localhost/slick";
-        final String path = "/api/simple/create_test_run";
+        final String path = SlickSimpleClientImpl.CREATE_TEST_RUN_PATH;
 
         String projectName = "foo";
-        String projectId = "1234-BOB";
+        SlickTestCase testCaseOne = SlickTestCase.builder()
+                .addTestTitle("bar")
+                .addAutomationId("foo")
+                .addAutomationTool("blah")
+                .addSteps(Lists.newArrayList("step"))
+                .addExpectations(Lists.newArrayList("expectation"))
+                .build();
+        SlickIdentity identity = new SlickIdentity("BLAH", "1234");
+        SlickResult resultOne = SlickResult.builder().addIdentity(identity).addTestCase(testCaseOne).build();
+        SlickIdentity testProject = new SlickIdentity(projectName, null);
+        SlickTestRun testRun = new SlickTestRunBuilder().addProject(testProject).addResult(resultOne).build();
 
+        String projectId = "1234-BOB";
         String testRunName = "bar";
         String testRunId = "1234-FRANK";
-
-        ArrayList<String> stepsOne = new ArrayList<>();
-        ArrayList<String> expectationsOne = new ArrayList<>();
-        stepsOne.add("1) test step");
-        stepsOne.add("2) test step");
-        expectationsOne.add("1) test expectation");
-        expectationsOne.add("2) test expectation");
-
-        SlickTestCase testCaseOne = SlickTestCase.builder()
-                .addAutomationKey("foo")
-                .addTestTitle("bar")
-                .addSteps(stepsOne)
-                .addExpectations(expectationsOne)
-                .build();
-        SlickResult resultOne = SlickResult.builder().addTestCase(testCaseOne).build();
-        SlickIdentity testProject = new SlickIdentity(projectName, null);
-        SlickTestRun testRun = new TestRunBuilder().addProject(testProject).build();
-
-
         SlickIdentity testProjectRet = new SlickIdentity(projectName, projectId);
         SlickIdentity testRunRet = new SlickIdentity(testRunName, testRunId);
-        ArrayList<String> stepsTwo = new ArrayList<>();
-        ArrayList<String> expectationsTwo = new ArrayList<>();
-        stepsTwo.add("1) test step");
-        stepsTwo.add("2) test step");
-        expectationsTwo.add("1) test expectation");
-        expectationsTwo.add("2) test expectation");
-
         SlickTestCase testCaseTwo = SlickTestCase.builder()
-                .addAutomationKey("foo")
                 .addTestTitle("bar")
-                .addSteps(stepsTwo)
-                .addExpectations(expectationsTwo)
+                .addAutomationId("foo")
+                .addAutomationTool("blah")
+                .addSteps(Lists.newArrayList("step"))
+                .addExpectations(Lists.newArrayList("expectation"))
                 .build();
-        SlickResult resultTwo = SlickResult.builder().addTestCase(testCaseTwo).build();
+        SlickIdentity identityTwo = new SlickIdentity("BLAH2", "1235");
+        SlickResult resultTwo = SlickResult.builder().addIdentity(identityTwo).addTestCase(testCaseTwo).build();
         SlickTestRun testRunRetValue = SlickTestRun.builder().addTestRun(testRunRet).addResult(resultTwo).addProject(testProjectRet).build();
-
-        final Entity entityDataRet = testRunRetValue.toEntity(mediaType);
+        final Entity entityDataRet = Entity.entity(testRunRetValue, mediaType);
         final Response response = Response.status(200).type(mediaType).entity(entityDataRet).build();
 
         new Expectations() {{
@@ -211,9 +195,9 @@ public class SlickSimpleClientTest {
             result = targetTwo;
 
             targetTwo.request(mediaType);
-            result = targetBuilder;
+            result = targetBuilderOne;
 
-            targetBuilder.post((Entity) any);
+            targetBuilderOne.post((Entity) any);
             result = response;
         }};
 
@@ -222,42 +206,12 @@ public class SlickSimpleClientTest {
         assertEquals(testRunRetValue, returnValue);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void addLogsEmptyResultId() {
-        final String baseUrl = "http://localhost/slick";
-
-        SlickLog logs = SlickLog.builder().addResultId("").addLog("foo").build();
-
-        SlickSimpleClientImpl simpleClient = SlickSimpleClientFactory.getSlickSimpleClient(baseUrl, restClient);
-        try {
-            simpleClient.addLogs(logs);
-        } catch (IllegalArgumentException e) {
-            assertEquals(e.getMessage(), "ResultId is null or empty");
-            throw e;
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void addLogsEmptyLogs() {
-        final String baseUrl = "http://localhost/slick";
-
-        SlickLog logs = SlickLog.builder().addResultId("1234").build();
-
-        SlickSimpleClientImpl simpleClient = SlickSimpleClientFactory.getSlickSimpleClient(baseUrl, restClient);
-        try {
-            simpleClient.addLogs(logs);
-        } catch (IllegalArgumentException e) {
-            assertEquals(e.getMessage(), "Logs are null or empty");
-            throw e;
-        }
-    }
-
     @Test(expected = HTTPException.class)
     public void addLogsBadStatus() {
         String resultId = "1234";
         final String mediaType = MediaType.APPLICATION_JSON;
         final String baseUrl = "http://localhost/slick";
-        final String path = "/api/simple/result/" + resultId;
+        final String path = SlickSimpleClientImpl.LOG_PATH(resultId);
         final Response response = Response.status(301).type(mediaType).build();
 
         new Expectations() {{
@@ -268,21 +222,77 @@ public class SlickSimpleClientTest {
             result = targetTwo;
 
             targetTwo.request(mediaType);
-            result = targetBuilder;
+            result = targetBuilderOne;
 
-            targetBuilder.post((Entity) any);
+            targetBuilderOne.post((Entity) any);
             result = response;
         }};
 
         SlickLog logs = SlickLog.builder().addResultId(resultId).addLog("foo").build();
-
         SlickSimpleClientImpl simpleClient = SlickSimpleClientFactory.getSlickSimpleClient(baseUrl, restClient);
         try{
-            simpleClient.addLogs(logs);
+            simpleClient.addLog(logs);
         } catch (HTTPException e) {
             assertEquals(e.getStatusCode(), 301);
             throw e;
         }
+    }
+
+    @Test(expected = HTTPException.class)
+    public void updateResultBadStatus() {
+        final String resultId = "12345";
+        final String baseUrl = "http://localhost/slick";
+        final String mediaType = MediaType.APPLICATION_JSON;
+        final String path = SlickSimpleClientImpl.UPDATE_RESULT_PATH(resultId) + "?status=NOT_TESTED";
+        final Response responseOne = Response.status(301).type(mediaType).build();
+
+        new Expectations() {{
+            restClient.target(baseUrl);
+            result = targetOne;
+
+            targetOne.path(path);
+            result = targetTwo;
+
+            targetTwo.request(mediaType);
+            result = targetBuilderOne;
+
+            targetBuilderOne.get();
+            result = responseOne;
+        }};
+
+        SlickSimpleClientImpl simpleClient = SlickSimpleClientFactory.getSlickSimpleClient(baseUrl, restClient);
+        try{
+            simpleClient.updateStatus("12345", SlickResultStatus.NOT_TESTED);
+        } catch (HTTPException e) {
+            assertEquals(e.getStatusCode(), 301);
+            throw e;
+        }
+    }
+
+    @Test
+    public void updateResult() {
+        final String resultId = "12345";
+        final String baseUrl = "http://localhost/slick";
+        final String mediaType = MediaType.APPLICATION_JSON;
+        final String path = SlickSimpleClientImpl.UPDATE_RESULT_PATH(resultId) + "?status=NO_RESULT";
+        final Response responseOne = Response.status(200).type(mediaType).build();
+
+        new Expectations() {{
+            restClient.target(baseUrl);
+            result = targetOne;
+
+            targetOne.path(path);
+            result = targetTwo;
+
+            targetTwo.request(mediaType);
+            result = targetBuilderOne;
+
+            targetBuilderOne.get();
+            result = responseOne;
+        }};
+
+        SlickSimpleClientImpl simpleClient = SlickSimpleClientFactory.getSlickSimpleClient(baseUrl, restClient);
+        simpleClient.updateStatus("12345", SlickResultStatus.NO_RESULT);
     }
 
 }

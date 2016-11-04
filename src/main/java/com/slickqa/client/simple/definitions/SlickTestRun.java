@@ -1,5 +1,6 @@
 package com.slickqa.client.simple.definitions;
 
+import com.google.common.base.Strings;
 import lombok.NonNull;
 
 import javax.ws.rs.client.Entity;
@@ -10,6 +11,8 @@ import java.util.List;
  */
 
 public class SlickTestRun {
+    public final static String MESSAGE_PROJECT_NAME_OR_ID_EMPTY = "Project Name and Id cannot both be empty";
+
     private final SlickIdentity project;
     private final SlickIdentity release;
     private final SlickIdentity build;
@@ -22,7 +25,12 @@ public class SlickTestRun {
                         SlickIdentity build,
                         SlickIdentity testPlan,
                         SlickIdentity testRun,
-                        List<SlickResult> results) {
+                        @NonNull List<SlickResult> results) {
+
+        if (Strings.isNullOrEmpty(project.getId()) && Strings.isNullOrEmpty(project.getName())) {
+            throw new IllegalArgumentException(MESSAGE_PROJECT_NAME_OR_ID_EMPTY);
+        }
+
         this.project = project;
         this.release = release;
         this.build = build;
@@ -55,16 +63,8 @@ public class SlickTestRun {
         return this.results;
     }
 
-    public Entity toEntity(String mediaType) {
-        return Entity.entity(this, mediaType);
-    }
-
-    public static SlickTestRun fromEntity(Entity entity) {
-        return (SlickTestRun) entity.getEntity();
-    }
-
-    public static TestRunBuilder builder() {
-        return new TestRunBuilder();
+    public static SlickTestRunBuilder builder() {
+        return new SlickTestRunBuilder();
     }
 
 }

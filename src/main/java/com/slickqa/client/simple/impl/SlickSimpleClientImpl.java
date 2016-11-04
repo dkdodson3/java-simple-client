@@ -1,10 +1,7 @@
 package com.slickqa.client.simple.impl;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.slickqa.client.simple.SlickSimpleClient;
-import com.slickqa.client.simple.definitions.SlickLog;
-import com.slickqa.client.simple.definitions.SlickTestRun;
+import com.slickqa.client.simple.definitions.*;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -15,101 +12,81 @@ import javax.xml.ws.http.HTTPException;
  * Created by Keith on 10/26/16.
  */
 public class SlickSimpleClientImpl implements SlickSimpleClient {
-    private final String mediaType = MediaType.APPLICATION_JSON;
-    private final WebTarget target;
+    public final static String MEDIA_TYPE = MediaType.APPLICATION_JSON;
+
+    // Simple Slick Paths
+    public static String CREATE_TEST_RUN_PATH = "/api/simple/create_test_run";
+    public static String UPDATE_RESULT_PATH(String resultId) { return "/api/simple/result/" + resultId; }
+    public static String LOG_PATH(String resultId) { return UPDATE_RESULT_PATH(resultId) + "/logs"; }
+    public static String CREATE_FILE_PATH(String resultId) { return UPDATE_RESULT_PATH(resultId) + "/create_file"; }
+    public static String UPLOAD_FILE_PATH(String resultId, String fileId) { return UPDATE_RESULT_PATH(resultId) + "/" + fileId; }
+
+    private final String baseUrl;
+    private final Client restClient;
 
     public SlickSimpleClientImpl(String baseUrl, Client restClient) {
-        WebTarget target = restClient.target(baseUrl);
-        this.target = target;
+        this.baseUrl = baseUrl;
+        this.restClient = restClient;
     }
 
-    @Override
-    public SlickTestRun addTestRun(SlickTestRun testRun) {
-        String path = "/api/simple/create_test_run";
+    private WebTarget getTarget() {
+        return restClient.target(baseUrl);
+    }
 
-        if (Strings.isNullOrEmpty(testRun.getProject().getId()) && Strings.isNullOrEmpty(testRun.getProject().getName())) {
-            throw new IllegalArgumentException("Project Name and Id cannot both be empty");
-        }
-
-        Entity entityData = testRun.toEntity(mediaType);
-
-        WebTarget currentTarget = this.target.path(path);
-        Invocation.Builder request = currentTarget.request(mediaType);
-        Response response = request.post(entityData);
-
+    private void checkStatus(Response response) {
         if ( response == null || response.getStatus() < 200 || response.getStatus() >= 300 ) {
             throw new HTTPException(response.getStatus());
         }
+    }
 
+    @Override
+    public SlickTestRun addTestRun(SlickTestRun testRun) throws HTTPException{
+        // Prepping the data and posting it to Simple Slick
+        Entity entityData = Entity.entity(testRun, MEDIA_TYPE);
+        WebTarget currentTarget = this.getTarget().path(CREATE_TEST_RUN_PATH);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+        Response response = request.post(entityData);
+
+        checkStatus(response);
+
+        // Change the response entity back to a TestRun and return it
         Entity entity = (Entity) response.getEntity();
-        SlickTestRun retTestRun = SlickTestRun.fromEntity(entity);
-        return retTestRun;
+        return (SlickTestRun) entity.getEntity();
     }
 
     @Override
-    public void addLogs(SlickLog slickLog) {
-        if (Strings.isNullOrEmpty(slickLog.getResultId())) {
-            throw new IllegalArgumentException("ResultId is null or empty");
-        }
+    public void updateStatus(String resultId, SlickResultStatus status) throws HTTPException {
+        // Getting the Simple Slick Path
+        String path = UPDATE_RESULT_PATH(resultId) + "?status=" + status.toString();
 
-        if (slickLog.getLogs() == null || slickLog.getLogs().size() < 1) {
-            throw new IllegalArgumentException("Logs are null or empty");
-        }
+        // Performing a HttpGet to the resultID with the status
+        WebTarget currentTarget = this.getTarget().path(path);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+        Response response = request.get();
 
-        String path = "/api/simple/result/" + slickLog.getResultId();
-
-        Entity entityData = slickLog.toEntity(mediaType);
-        WebTarget currentTarget = this.target.path(path);
-        Invocation.Builder request = currentTarget.request(mediaType);
-        Response response = request.post(entityData);
-
-        if ( response == null || response.getStatus() < 200 || response.getStatus() >= 300 ) {
-            throw new HTTPException(response.getStatus());
-        }
+        checkStatus(response);
     }
 
-//
-//    @Override
-//    public ArrayList<SlickResult> sendResults(String testRunId, ArrayList<SlickResult> results) {
-//        return null;
-//    }
-//
-//    @Override
-//    public void sendLog(String resultId, SlickLog slickLog) {
-//        ObjectMapper mapper = JsonUtil.getObjectMapper();
-//        ArrayNode entry = mapper.createArrayNode();
-//        entry.add("class LogEntry {\n");
-//        entry.add("  exceptionClassName: " );
-//
-//
-////            StringBuilder sb = new StringBuilder();
-////            sb.append("class LogEntry {\n");
-////            sb.append("  exceptionClassName: ").append(exceptionClassName).append("\n");
-////            sb.append("  level: ").append(level).append("\n");
-////            sb.append("  exceptionMessage: ").append(exceptionMessage).append("\n");
-////            sb.append("  entryTime: ").append(entryTime).append("\n");
-////            sb.append("  loggerName: ").append(loggerName).append("\n");
-////            sb.append("  exceptionStackTrace: ").append(exceptionStackTrace).append("\n");
-////            sb.append("  message: ").append(message).append("\n");
-////            sb.append("}\n");
-//
-//    }
-//
-//    @Override
-//    public void sendFile(String resultId, SlickFile slickFile) {
-//        String serverFileName = SlickSimpleWeb.getFileId();
-//        // Get Mime type from file
-//        // Split file into chunks of BLAH
-//        // Create the file on the server
-//        // Upload the file chunks to the file
-//
-//        //    sb.append("  mimetype: ").append(mimetype).append("\n");
-////    sb.append("  chunkSize: ").append(chunkSize).append("\n");
-////    sb.append("  filename: ").append(filename).append("\n");
-////    sb.append("  length: ").append(length).append("\n");
-////    sb.append("  uploadDate: ").append(uploadDate).append("\n");
-////    sb.append("  id: ").append(id).append("\n");
-////    sb.append("  md5: ").append(md5).append("\n")
+    @Override
+    public void addLog(SlickLog slickLog) throws HTTPException, IllegalArgumentException {
+        // Getting the Simple Slick Path
+        String path = LOG_PATH(slickLog.getResultId());
 
-//    }
+        // Prepping the data and posting it to Simple Slick
+        Entity entityData = Entity.entity(slickLog, MEDIA_TYPE);
+        WebTarget currentTarget = this.getTarget().path(path);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+        Response response = request.post(entityData);
+
+        checkStatus(response);
+    }
+
+    @Override
+    public void addFile(SlickFile slickFile) {
+        // Verify file is valid
+        // Get FileType
+        // Call CreateFile on Slick
+        // Break the file into chunks
+        // Upload the chunks to Slick
+    }
 }

@@ -5,7 +5,7 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestRunBuilder {
+public class SlickTestRunBuilder {
     private SlickIdentity project;
     private SlickIdentity release;
     private SlickIdentity build;
@@ -13,33 +13,33 @@ public class TestRunBuilder {
     private SlickIdentity testRun;
     private List<SlickResult> results;
 
-    public TestRunBuilder addProject(@NonNull SlickIdentity project) {
+    public SlickTestRunBuilder addProject(SlickIdentity project) {
         this.project = project;
         return this;
     }
 
-    public TestRunBuilder addRelease(SlickIdentity release) {
+    public SlickTestRunBuilder addRelease(SlickIdentity release) {
         this.release = release;
         return this;
     }
 
-    public TestRunBuilder addBuild(SlickIdentity build) {
+    public SlickTestRunBuilder addBuild(SlickIdentity build) {
         this.build = build;
         return this;
     }
 
-    public TestRunBuilder addTestPlan(SlickIdentity testPlan) {
+    public SlickTestRunBuilder addTestPlan(SlickIdentity testPlan) {
         this.testPlan = testPlan;
         return this;
     }
 
-    public TestRunBuilder addTestRun(SlickIdentity testRun) {
+    public SlickTestRunBuilder addTestRun(SlickIdentity testRun) {
 
         this.testRun = testRun;
         return this;
     }
 
-    public TestRunBuilder addResult(SlickResult result) {
+    public SlickTestRunBuilder addResult(SlickResult result) {
         if (this.results == null) {
             this.results = new ArrayList<>();
         }
@@ -48,7 +48,7 @@ public class TestRunBuilder {
         return this;
     }
 
-    public TestRunBuilder addResults(List<SlickResult> results) {
+    public SlickTestRunBuilder addResults(List<SlickResult> results) {
         if (this.results == null) {
             this.results = new ArrayList<>();
         }

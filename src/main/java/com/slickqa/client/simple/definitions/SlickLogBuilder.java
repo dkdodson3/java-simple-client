@@ -9,7 +9,7 @@ public class SlickLogBuilder {
     private String resultId;
     private List<String> logs;
 
-    public SlickLogBuilder addResultId(@NonNull String resultId) {
+    public SlickLogBuilder addResultId(String resultId) {
         this.resultId = resultId;
         return this;
     }
