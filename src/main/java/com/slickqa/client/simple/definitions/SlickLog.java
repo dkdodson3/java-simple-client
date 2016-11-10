@@ -1,34 +1,81 @@
 package com.slickqa.client.simple.definitions;
 
-import lombok.NonNull;
-
-import javax.ws.rs.client.Entity;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.slickqa.client.simple.utils.JsonUtil;
 
 /**
  * Created by Keith on 10/26/16.
  */
 public class SlickLog {
-    public final static String MESSAGE_LOG_EMPTY = "Logs are null or empty";
+    private final String exceptionClassName;
+    private final String level;
+    private final String exceptionMessage;
+    private final Long entryTime;
+    private final String loggerName;
+    private final String exceptionStackTrace;
+    private final String message;
 
-    private final String resultId;
-    private final List<String> logs;
-
-    public SlickLog(@NonNull String resultId, @NonNull List<String> logs) {
-        this.resultId = resultId;
-        this.logs = logs;
-
-        if (logs.size() < 1) {
-            throw new IllegalArgumentException(MESSAGE_LOG_EMPTY);
-        }
+    public SlickLog(String exceptionClassName, String level, String exceptionMessage, Long entryTime, String loggerName, String exceptionStackTrace, String message) {
+        this.exceptionClassName = exceptionClassName;
+        this.level = level;
+        this.exceptionMessage = exceptionMessage;
+        this.entryTime = entryTime;
+        this.loggerName = loggerName;
+        this.exceptionStackTrace = exceptionStackTrace;
+        this.message = message;
     }
 
-    public String getResultId() {
-        return resultId;
+    public String getExceptionClassName() {
+        return exceptionClassName;
     }
 
-    public List<String> getLogs() {
-        return logs;
+    public String getLevel() {
+        return level;
+    }
+
+    public String getExceptionMessage() {
+        return exceptionMessage;
+    }
+
+    public Long getEntryTime() {
+        return entryTime;
+    }
+
+    public String getLoggerName() {
+        return loggerName;
+    }
+
+    public String getExceptionStackTrace() {
+        return exceptionStackTrace;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public ObjectNode toObjectNode() {
+        ObjectMapper mapper = JsonUtil.getObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("exceptionClassName", this.getExceptionClassName());
+        objectNode.put("level", this.getLevel());
+        objectNode.put("exceptionMessage", this.getExceptionMessage());
+        objectNode.put("entryTime", this.getEntryTime());
+        objectNode.put("loggerName", this.getLoggerName());
+        objectNode.put("exceptionStackTrace", this.getExceptionStackTrace());
+        objectNode.put("message", this.getMessage());
+        return objectNode;
+    }
+
+    public static SlickLog fromJsonNode(JsonNode node) {
+        return new SlickLog(node.get("exceptionClassName").textValue(),
+                node.get("level").textValue(),
+                node.get("exceptionMessage").textValue(),
+                node.get("entryTime").asLong(),
+                node.get("loggerName").textValue(),
+                node.get("exceptionStackTrace").textValue(),
+                node.get("message").textValue());
     }
 
     public static SlickLogBuilder builder() {

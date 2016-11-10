@@ -145,11 +145,6 @@
       <artifactId>jersey-client</artifactId>
       <version>${jersey-version}</version>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>com.fasterxml.jackson.core</groupId>-->
-      <!--<artifactId>jackson-core</artifactId>-->
-      <!--<version>${jackson-version}</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
@@ -160,11 +155,11 @@
       <artifactId>jackson-databind</artifactId>
       <version>${jackson-version}</version>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.apache.tika</groupId>-->
-      <!--<artifactId>tika-core</artifactId>-->
-      <!--<version>1.6</version>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.2</version>
+    </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -184,12 +179,6 @@
       <version>${junit-version}</version>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>com.google.code.bean-matchers</groupId>-->
-      <!--<artifactId>bean-matchers</artifactId>-->
-      <!--<version>0.9</version>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -201,12 +190,6 @@
           <artifactId>guava</artifactId>
           <version>RELEASE</version>
       </dependency>
-      <!--<dependency>-->
-      <!--<groupId>com.google.truth</groupId>-->
-      <!--<artifactId>truth</artifactId>-->
-      <!--<version>0.25</version>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
 
   </dependencies>
 

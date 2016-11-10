@@ -1,27 +1,25 @@
 package com.slickqa.client.simple.definitions;
 
 import com.google.common.base.Strings;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SlickTestCaseBuilder {
-    private String component;
-    private String feature;
+    private SlickIdentity component;
+    private SlickIdentity feature;
     private String automationId;
     private String automationKey;
     private String automationTool;
-    private String testTitle;
-    private List<String> steps;
-    private List<String> expectations;
+    private String name;
+    private List<SlickStep> steps;
 
-    public SlickTestCaseBuilder addComponent(String component) {
+    public SlickTestCaseBuilder addComponent(SlickIdentity component) {
         this.component = component;
         return this;
     }
 
-    public SlickTestCaseBuilder addFeature(String feature) {
+    public SlickTestCaseBuilder addFeature(SlickIdentity feature) {
         this.feature = feature;
         return this;
     }
@@ -41,12 +39,12 @@ public class SlickTestCaseBuilder {
         return this;
     }
 
-    public SlickTestCaseBuilder addTestTitle(String testTitle) {
-        this.testTitle = testTitle;
+    public SlickTestCaseBuilder addName(String name) {
+        this.name = name;
         return this;
     }
 
-    public SlickTestCaseBuilder addStep(String step) {
+    public SlickTestCaseBuilder addStep(SlickStep step) {
         if (this.steps == null) {
             this.steps = new ArrayList<>();
         }
@@ -55,7 +53,7 @@ public class SlickTestCaseBuilder {
         return this;
     }
 
-    public SlickTestCaseBuilder addSteps(List<String> steps) {
+    public SlickTestCaseBuilder addSteps(List<SlickStep> steps) {
         if (this.steps == null) {
             this.steps = new ArrayList<>();
         }
@@ -64,29 +62,11 @@ public class SlickTestCaseBuilder {
         return this;
     }
 
-    public SlickTestCaseBuilder addExpectation(String expectation) {
-        if (this.expectations == null) {
-            this.expectations = new ArrayList<>();
-        }
-
-        this.expectations.add(expectation);
-        return this;
-    }
-
-    public SlickTestCaseBuilder addExpectations(List<String> expectations) {
-        if (this.expectations == null) {
-            this.expectations = new ArrayList<>();
-        }
-
-        this.expectations.addAll(expectations);
-        return this;
-    }
-
     public SlickTestCase build() {
         if (Strings.isNullOrEmpty(automationId) && Strings.isNullOrEmpty(automationKey)) {
             throw new IllegalArgumentException(SlickTestCase.MESSAGE_EMPTY_AUTOMATION);
         }
 
-        return new SlickTestCase(component, feature, automationId, automationKey, automationTool, testTitle, steps, expectations);
+        return new SlickTestCase(name, component, feature, automationId, automationKey, automationTool, steps);
     }
 }

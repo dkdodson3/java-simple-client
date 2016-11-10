@@ -1,26 +1,25 @@
 package com.slickqa.client.simple.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.slickqa.client.simple.SlickSimpleClient;
 import com.slickqa.client.simple.definitions.*;
-
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.http.HTTPException;
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+
+import static com.slickqa.client.simple.utils.JsonUtil.mapper;
 
 /**
  * Created by Keith on 10/26/16.
  */
 public class SlickSimpleClientImpl implements SlickSimpleClient {
-    public final static String MEDIA_TYPE = MediaType.APPLICATION_JSON;
-
-    // Simple Slick Paths
-    public static String CREATE_TEST_RUN_PATH = "/api/simple/create_test_run";
-    public static String UPDATE_RESULT_PATH(String resultId) { return "/api/simple/result/" + resultId; }
-    public static String LOG_PATH(String resultId) { return UPDATE_RESULT_PATH(resultId) + "/logs"; }
-    public static String CREATE_FILE_PATH(String resultId) { return UPDATE_RESULT_PATH(resultId) + "/create_file"; }
-    public static String UPLOAD_FILE_PATH(String resultId, String fileId) { return UPDATE_RESULT_PATH(resultId) + "/" + fileId; }
-
+    private final String MEDIA_TYPE = MediaType.APPLICATION_JSON;
     private final String baseUrl;
     private final Client restClient;
 
@@ -34,46 +33,131 @@ public class SlickSimpleClientImpl implements SlickSimpleClient {
     }
 
     private void checkStatus(Response response) {
-        if ( response == null || response.getStatus() < 200 || response.getStatus() >= 300 ) {
+
+        if (response == null) {
+            throw new NullPointerException("No Response...");
+        }
+
+        if (response.getStatus() < 200 || response.getStatus() >= 300) {
             throw new HTTPException(response.getStatus());
         }
     }
 
-    @Override
-    public SlickTestRun addTestRun(SlickTestRun testRun) throws HTTPException{
-        // Prepping the data and posting it to Simple Slick
-        Entity entityData = Entity.entity(testRun, MEDIA_TYPE);
-        WebTarget currentTarget = this.getTarget().path(CREATE_TEST_RUN_PATH);
-        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
-        Response response = request.post(entityData);
-
-        checkStatus(response);
-
+    private String getEntityData(Response response) throws IOException {
         // Change the response entity back to a TestRun and return it
-        Entity entity = (Entity) response.getEntity();
-        return (SlickTestRun) entity.getEntity();
+        String responseValue;
+        try {
+            responseValue = ((Entity) response.getEntity()).getEntity().toString();
+        } catch (ClassCastException e) {
+            throw new IOException("Could not convert response to entity: "
+                    + response.getEntity().getClass().getName() + " - "
+                    + response.getEntity().toString());
+        }
+
+        return responseValue;
     }
 
     @Override
-    public void updateStatus(String resultId, SlickResultStatus status) throws HTTPException {
-        // Getting the Simple Slick Path
-        String path = UPDATE_RESULT_PATH(resultId) + "?status=" + status.toString();
+    public SlickTestRun addTestRun(SlickTestRun testRun) throws HTTPException, IOException {
+        String path = "/api/simple/testruns";
 
-        // Performing a HttpGet to the resultID with the status
+        Entity entityData = Entity.entity(testRun.toObjectNode(), MEDIA_TYPE);
         WebTarget currentTarget = this.getTarget().path(path);
         Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
-        Response response = request.get();
+        Response response = request.post(entityData);
 
         checkStatus(response);
+        JsonNode jsonNode = mapper.readTree(getEntityData(response));
+
+        return SlickTestRun.fromJsonNode(jsonNode);
     }
 
     @Override
-    public void addLog(SlickLog slickLog) throws HTTPException, IllegalArgumentException {
-        // Getting the Simple Slick Path
-        String path = LOG_PATH(slickLog.getResultId());
+    public ArrayList<SlickResult> addResults(String testRunId, ArrayList<SlickResult> results) throws IOException {
+        String path = "/api/simple/" + testRunId + "/results";
+        ArrayList<SlickResult> createList = new ArrayList<>();
+        ArrayList<SlickResult> updateList = new ArrayList<>();
+
+        for (SlickResult result: results) {
+            if (result.getId() == null) {
+                createList.add(result);
+            } else {
+                updateList.add(result);
+            }
+        }
+
+        ArrayList<SlickResult> returnedResultList = new ArrayList<>();
+        if (createList.size() > 0) {
+            returnedResultList.addAll(createResults(path, createList));
+        }
+
+        if (updateList.size() > 0) {
+            returnedResultList.addAll(updateResults(path, updateList));
+        }
+
+        return returnedResultList;
+    }
+
+    private ArrayList<SlickResult> createResults(String path, ArrayList<SlickResult> results) throws HTTPException, IOException {
+
+        ArrayNode mainArray = mapper.createArrayNode();
+        for (SlickResult result : results) {
+            mainArray.add(result.toObjectNode());
+        }
 
         // Prepping the data and posting it to Simple Slick
-        Entity entityData = Entity.entity(slickLog, MEDIA_TYPE);
+        Entity entityData = Entity.entity(mainArray, MEDIA_TYPE);
+        WebTarget currentTarget = this.getTarget().path(path);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+        Response response = request.post(entityData);
+
+        checkStatus(response);
+        JsonNode jsonNode = mapper.readTree(getEntityData(response));
+
+        ArrayList<SlickResult> returnResults = new ArrayList<>();
+        for (JsonNode node : jsonNode) {
+            returnResults.add(SlickResult.fromJsonNode(node));
+        }
+
+        return returnResults;
+    }
+
+    private ArrayList<SlickResult> updateResults(String path, ArrayList<SlickResult> results) throws HTTPException, IOException {
+        ArrayNode mainArray = mapper.createArrayNode();
+        for (SlickResult result : results) {
+            mainArray.add(result.toObjectNode());
+        }
+
+        // Prepping the data and posting it to Simple Slick
+        Entity entityData = Entity.entity(mainArray, MEDIA_TYPE);
+        WebTarget currentTarget = this.getTarget().path(path);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+
+        Response response = request.put(entityData);
+
+        checkStatus(response);
+        JsonNode jsonNode = mapper.readTree(getEntityData(response));
+
+        ArrayList<SlickResult> returnResults = new ArrayList<>();
+        for (JsonNode node : jsonNode) {
+            returnResults.add(SlickResult.fromJsonNode(node));
+        }
+
+        return returnResults;
+    }
+
+    @Override
+    public void addLogs(String testRunId, String resultId, ArrayList<SlickLog> slickLogs) throws HTTPException {
+        // Getting the Simple Slick Path
+        String path = "/api/simple/" + testRunId + "/results/" + resultId + "/log";
+
+        ArrayNode mainArray = mapper.createArrayNode();
+        for (SlickLog log : slickLogs) {
+            mainArray.add(log.toObjectNode());
+        }
+
+        // Prepping the data and posting it to Simple Slick
+        Entity entityData = Entity.entity(mainArray, MEDIA_TYPE);
         WebTarget currentTarget = this.getTarget().path(path);
         Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
         Response response = request.post(entityData);
@@ -82,11 +166,64 @@ public class SlickSimpleClientImpl implements SlickSimpleClient {
     }
 
     @Override
-    public void addFile(SlickFile slickFile) {
-        // Verify file is valid
-        // Get FileType
-        // Call CreateFile on Slick
-        // Break the file into chunks
-        // Upload the chunks to Slick
+    public ArrayList<SlickFile> addFiles(String testRunId, String resultId, ArrayList<SlickFile> slickFiles) throws IOException {
+        String path = "/api/simple/" + testRunId + "/results/" + resultId + "/files";
+
+        ArrayList<SlickFile> returnedSlickFiles = new ArrayList<>();
+        for (SlickFile slickFile: slickFiles) {
+            SlickFile tempSlickFile = slickFile;
+            if (slickFile.getIdentity().getId() == null) {
+                tempSlickFile = createFile(path, slickFile);
+            }
+
+            uploadFile(path, tempSlickFile);
+
+            returnedSlickFiles.add(tempSlickFile);
+        }
+
+        return returnedSlickFiles;
     }
+
+    private SlickFile createFile(String path, SlickFile slickFile) throws IOException {
+        if (slickFile.getMimeType() == null) {
+            URL url = new URL("file://" +  slickFile.getFilePath());
+            slickFile.setMimeType(url.openConnection().getContentType());
+        }
+
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("filename", slickFile.getIdentity().getName());
+        objectNode.put("mimetype", slickFile.getMimeType());
+
+        Entity entityData = Entity.entity(objectNode, MEDIA_TYPE);
+        WebTarget currentTarget = this.getTarget().path(path);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+        Response response = request.post(entityData);
+
+        JsonNode jsonNode = mapper.readTree(getEntityData(response));
+        slickFile.setChunkSize(jsonNode.get("chunksize").intValue());
+        slickFile.getIdentity().setId(jsonNode.get("id").textValue());
+
+        return slickFile;
+    }
+
+    private void uploadFile(String path, SlickFile slickFile) throws IOException {
+        path = path + "/" + slickFile.getIdentity().getId();
+        WebTarget currentTarget = this.getTarget().path(path);
+        Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
+
+        File file = new File(slickFile.getFilePath().toString());
+        FileInputStream stream = new FileInputStream(file);
+
+        byte[] buffer = new byte[slickFile.getChunkSize()];
+        int last_read;
+        do {
+            last_read = stream.read(buffer, 0, slickFile.getChunkSize());
+            Entity entityData = Entity.entity(buffer, slickFile.getMimeType());
+
+            Response response = request.post(entityData);
+            checkStatus(response);
+
+        } while (last_read == slickFile.getChunkSize());
+    }
+
 }

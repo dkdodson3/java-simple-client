@@ -1,38 +1,50 @@
 package com.slickqa.client.simple.definitions;
 
-import lombok.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class SlickLogBuilder {
-    private String resultId;
-    private List<String> logs;
+    private String exceptionClassName;
+    private String level;
+    private String exceptionMessage;
+    private Long entryTime;
+    private String loggerName;
+    private String exceptionStackTrace;
+    private String message;
 
-    public SlickLogBuilder addResultId(String resultId) {
-        this.resultId = resultId;
+    public SlickLogBuilder addExceptionClassName(String exceptionClassName) {
+        this.exceptionClassName = exceptionClassName;
         return this;
     }
 
-    public SlickLogBuilder addLog(String log) {
-        if (this.logs == null) {
-            this.logs = new ArrayList<>();
-        }
-
-        this.logs.add(log);
+    public SlickLogBuilder addLevel(String level) {
+        this.level = level;
         return this;
     }
 
-    public SlickLogBuilder addLogs(List<String> logs) {
-        if (this.logs == null) {
-            this.logs = new ArrayList<>();
-        }
+    public SlickLogBuilder addExceptionMessage(String exceptionMessage) {
+        this.exceptionMessage = exceptionMessage;
+        return this;
+    }
 
-        this.logs.addAll(logs);
+    public SlickLogBuilder addEntryTime(Long entryTime) {
+        this.entryTime = entryTime;
+        return this;
+    }
+
+    public SlickLogBuilder addLoggerName(String loggerName) {
+        this.loggerName = loggerName;
+        return this;
+    }
+
+    public SlickLogBuilder addExceptionStackTrace(String exceptionStackTrace) {
+        this.exceptionStackTrace = exceptionStackTrace;
+        return this;
+    }
+
+    public SlickLogBuilder addMessage(String message) {
+        this.message = message;
         return this;
     }
 
     public SlickLog build() {
-        return new SlickLog(resultId, logs);
+        return new SlickLog(exceptionClassName, level, exceptionMessage, entryTime, loggerName, exceptionStackTrace, message);
     }
 }

@@ -6,44 +6,36 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.slickqa.client.simple.utils.JsonUtil;
 
 /**
- * Created by Keith on 10/25/16.
+ * Created by Keith on 11/7/16.
  */
-public class SlickIdentity {
-    private String name;
-    private String id;
+public class SlickStep {
+    private final String name;
+    private final String expectedResults;
 
-    public SlickIdentity(String name, String id) {
+    public SlickStep(String name, String expectedResults) {
         this.name = name;
-        this.id = id;
+        this.expectedResults = expectedResults;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public String getExpectedResults() {
+        return expectedResults;
     }
 
     public ObjectNode toObjectNode() {
         ObjectMapper mapper = JsonUtil.getObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
         objectNode.put("name", this.getName());
-        objectNode.put("id", this.getId());
+        objectNode.put("expectedResults", this.getExpectedResults());
         return objectNode;
     }
 
-    public static SlickIdentity fromJsonNode(JsonNode node) {
-        return new SlickIdentity(
+    public static SlickStep fromJsonNode(JsonNode node) {
+        return new SlickStep(
                 node.get("name").textValue(),
-                node.get("id").textValue());
+                node.get("expectedResults").textValue());
     }
 }

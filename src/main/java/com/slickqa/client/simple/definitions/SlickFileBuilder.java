@@ -1,18 +1,14 @@
 package com.slickqa.client.simple.definitions;
 
-import lombok.NonNull;
+import java.nio.file.Path;
 
 public class SlickFileBuilder {
-    private String resultId;
-    private String filePath;
+    private Path filePath;
     private SlickIdentity identity;
+    private Integer chunkSize;
+    private String mimeType;
 
-    public SlickFileBuilder addResultId(String resultId) {
-        this.resultId = resultId;
-        return this;
-    }
-
-    public SlickFileBuilder addFilePath(String filePath) {
+    public SlickFileBuilder addFilePath(Path filePath) {
         this.filePath = filePath;
         return this;
     }
@@ -22,7 +18,17 @@ public class SlickFileBuilder {
         return this;
     }
 
+    public SlickFileBuilder addChunkSize(Integer chunkSize) {
+        this.chunkSize = chunkSize;
+        return this;
+    }
+
+    public SlickFileBuilder addMimeType(String mimeType) {
+        this.mimeType = mimeType;
+        return this;
+    }
+
     public SlickFile build() {
-        return new SlickFile(resultId, filePath, identity);
+        return new SlickFile(filePath, identity, chunkSize, mimeType);
     }
 }
