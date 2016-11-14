@@ -1,0 +1,27 @@
+apply plugin: "java"
+
+repositories {
+    mavenCentral()
+}
+
+String jerseyVersion = "2.7"
+String jacksonVersion = "2.3.2"
+String junitVersion = "4.11"
+String jmockitVersion = "1.6"
+String httpClientVersion = "4.5.2"
+String lombokVersion = "1.16.8"
+String guavaVersion = "20.0"
+
+dependencies {
+    compile "org.glassfish.jersey.core:jersey-client:${jerseyVersion}"
+    compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+    compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    compile "org.apache.httpcomponents:httpclient:${httpClientVersion}"
+    compile "org.projectlombok:lombok:${lombokVersion}"
+    compile "com.google.guava:guava:${guavaVersion}"
+
+    testCompile "com.googlecode.jmockit:jmockit:${jmockitVersion}"
+    testCompile "junit:junit:${junitVersion}"
+}
+
+
