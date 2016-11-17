@@ -16,8 +16,8 @@ import java.util.List;
  */
 
 public class SlickTestCase {
-    private final SlickIdentity component;
-    private final SlickIdentity feature;
+    private final String component;
+    private final String feature;
     private final String automationId;
     private final String automationKey;
     private final String automationTool;
@@ -27,8 +27,8 @@ public class SlickTestCase {
     public final static String MESSAGE_EMPTY_AUTOMATION = "Must have either automationId or automationKey";
 
     public SlickTestCase(@NonNull String name,
-                         SlickIdentity component,
-                         SlickIdentity feature,
+                         String component,
+                         String feature,
                          String automationId,
                          String automationKey,
                          @NonNull String automationTool,
@@ -47,11 +47,11 @@ public class SlickTestCase {
         this.steps = steps;
     }
 
-    public SlickIdentity getComponent() {
+    public String getComponent() {
         return component;
     }
 
-    public SlickIdentity getFeature() {
+    public String getFeature() {
         return feature;
     }
 
@@ -89,8 +89,8 @@ public class SlickTestCase {
         }
 
         objectNode.put("name", this.getName());
-        objectNode.put("component", this.getComponent().toObjectNode());
-        objectNode.put("feature", this.getFeature().toObjectNode());
+        objectNode.put("component", this.getComponent());
+        objectNode.put("feature", this.getFeature());
         objectNode.put("automationId", this.getAutomationId());
         objectNode.put("automationKey", this.getAutomationKey());
         objectNode.put("automationTool", this.getAutomationTool());
@@ -100,9 +100,6 @@ public class SlickTestCase {
     }
 
     public static SlickTestCase fromJsonNode(JsonNode node){
-        SlickIdentity component = SlickIdentity.fromJsonNode(node.get("component"));
-        SlickIdentity feature = SlickIdentity.fromJsonNode(node.get("feature"));
-
         ArrayList<SlickStep> steps = new ArrayList<>();
         for (JsonNode step : node.get("steps")) {
             steps.add(SlickStep.fromJsonNode(step));
@@ -110,8 +107,8 @@ public class SlickTestCase {
 
         return new SlickTestCase(
                 node.get("name").textValue(),
-                component,
-                feature,
+                node.get("component").textValue(),
+                node.get("feature").textValue(),
                 node.get("automationId").textValue(),
                 node.get("automationKey").textValue(),
                 node.get("automationTool").textValue(),

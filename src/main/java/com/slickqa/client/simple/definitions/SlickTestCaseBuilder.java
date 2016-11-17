@@ -6,20 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SlickTestCaseBuilder {
-    private SlickIdentity component;
-    private SlickIdentity feature;
+    private String component;
+    private String feature;
     private String automationId;
     private String automationKey;
     private String automationTool;
     private String name;
     private List<SlickStep> steps;
 
-    public SlickTestCaseBuilder addComponent(SlickIdentity component) {
+    public SlickTestCaseBuilder addComponent(String component) {
         this.component = component;
         return this;
     }
 
-    public SlickTestCaseBuilder addFeature(SlickIdentity feature) {
+    public SlickTestCaseBuilder addFeature(String feature) {
         this.feature = feature;
         return this;
     }

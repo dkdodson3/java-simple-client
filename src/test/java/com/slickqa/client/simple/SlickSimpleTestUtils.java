@@ -12,9 +12,6 @@ import static org.junit.Assert.assertNull;
 public class SlickSimpleTestUtils {
 
     public static SlickTestCase getTestCase(String text, String id) {
-        SlickIdentity component = new SlickIdentity("component" + text, id);
-        SlickIdentity feature = new SlickIdentity("feature" + text, id);
-
         SlickStep step1 = new SlickStep("First Step: " + text, "Show me the money: " + text);
         SlickStep step2 = new SlickStep("Second Step: " + text, "Show me the gold: " + text);
 
@@ -23,8 +20,8 @@ public class SlickSimpleTestUtils {
                 .addAutomationKey(text)
                 .addStep(step1)
                 .addStep(step2)
-                .addComponent(component)
-                .addFeature(feature)
+                .addComponent(text)
+                .addFeature(text)
                 .addAutomationId(text)
                 .addAutomationTool(text)
                 .build();
@@ -98,13 +95,12 @@ public class SlickSimpleTestUtils {
         assertEquals(testCase1.getAutomationId(), testCase2.getAutomationId());
         assertEquals(testCase1.getAutomationKey(), testCase2.getAutomationKey());
         assertEquals(testCase1.getAutomationTool(), testCase2.getAutomationTool());
+        assertEquals(testCase1.getComponent(), testCase2.getComponent());
+        assertEquals(testCase1.getFeature(), testCase2.getFeature());
 
         for (int i = 0; i < testCase1.getSteps().size(); i++) {
             validateStep(testCase1.getSteps().get(i), testCase2.getSteps().get(i));
         }
-
-        validateSlickIdentity(testCase1.getComponent(), testCase2.getComponent(), id);
-        validateSlickIdentity(testCase1.getFeature(), testCase2.getFeature(), id);
     }
 
     public static void validateResult(SlickResult result1, SlickResult result2, Boolean id) {

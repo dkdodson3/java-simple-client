@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 
 public class SlickResult {
-    private final String id;
+    private String id;
     private final SlickTestCase testCase;
     private final String reason;
     private final Long started;
@@ -38,6 +38,10 @@ public class SlickResult {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public SlickTestCase getTestCase() {

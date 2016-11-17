@@ -41,7 +41,7 @@ public class SlickSimpleTestRunTest {
 
     @Test
     public void addTestRun() throws IOException {
-        SlickTestRun testRun = SlickSimpleTestUtils.getTestRun("Foo", null);
+        SlickTestRun testRun = SlickSimpleTestUtils.getTestRun("SlickResultRule", null);
 
         // Prepping the data and posting it to Simple Slick
         Entity entityData = Entity.entity(testRun.toObjectNode(), mediaType);
@@ -69,7 +69,7 @@ public class SlickSimpleTestRunTest {
 
     @Test(expected = HTTPException.class)
     public void addTestRunBadStatus() throws IOException {
-        SlickTestRun testRun = SlickSimpleTestUtils.getTestRun("Foo", null);
+        SlickTestRun testRun = SlickSimpleTestUtils.getTestRun("SlickResultRule", null);
 
         // Prepping the data and posting it to Simple Slick
         Entity entityData = Entity.entity(testRun.toObjectNode(), mediaType);
@@ -96,7 +96,7 @@ public class SlickSimpleTestRunTest {
 
     @Test(expected = IOException.class)
     public void addTestRunFooBar() throws IOException {
-        SlickTestRun testRun = SlickSimpleTestUtils.getTestRun("Foo", null);
+        SlickTestRun testRun = SlickSimpleTestUtils.getTestRun("SlickResultRule", null);
 
         // Prepping the data and posting it to Simple Slick
         Entity entityData = Entity.entity(testRun.toObjectNode(), mediaType);

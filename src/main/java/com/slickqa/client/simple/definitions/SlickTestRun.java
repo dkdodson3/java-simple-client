@@ -17,7 +17,7 @@ import java.util.List;
  */
 
 public class SlickTestRun {
-    public final static String MESSAGE_PROJECT_NAME_OR_ID_EMPTY = "Project Name and Id cannot both be empty";
+    public final static String MESSAGE_PROJECT_NAME_OR_ID_EMPTY = "TestRun Name and Id cannot both be empty";
 
     private final Long started;
     private final Long finished;
@@ -80,17 +80,20 @@ public class SlickTestRun {
         ObjectNode objectNode = mapper.createObjectNode();
 
         ArrayNode resultsNode = mapper.createArrayNode();
-        for (SlickResult result : this.getResults()) {
-            resultsNode.add(result.toObjectNode());
+        if (this.getResults() != null) {
+            for (SlickResult result : this.getResults()) {
+                resultsNode.add(result.toObjectNode());
+            }
         }
+
 
         objectNode.put("started", this.getStarted());
         objectNode.put("finished", this.getFinished());
-        objectNode.put("project", this.getProject().toObjectNode());
-        objectNode.put("release", this.getRelease().toObjectNode());
-        objectNode.put("build", this.getBuild().toObjectNode());
-        objectNode.put("testPlan", this.getTestPlan().toObjectNode());
-        objectNode.put("testRun", this.getTestRun().toObjectNode());
+        objectNode.put("project", (this.getProject() != null ) ? this.getProject().toObjectNode() : null);
+        objectNode.put("release", (this.getRelease() != null ) ? this.getRelease().toObjectNode() : null);
+        objectNode.put("build", (this.getBuild() != null ) ? this.getBuild().toObjectNode() : null);
+        objectNode.put("testPlan", (this.getTestPlan() != null ) ? this.getTestPlan().toObjectNode() : null);
+        objectNode.put("testRun", (this.getTestRun() != null ) ? this.getTestRun().toObjectNode() : null);
         objectNode.put("results", resultsNode);
 
         return objectNode;

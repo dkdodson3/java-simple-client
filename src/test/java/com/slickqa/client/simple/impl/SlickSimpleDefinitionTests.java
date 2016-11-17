@@ -16,7 +16,7 @@ public class SlickSimpleDefinitionTests {
 
     @Test
     public void testCaseRoundTripSerializationTest() {
-        SlickTestCase testCase1 = SlickSimpleTestUtils.getTestCase("Blah", null);
+        SlickTestCase testCase1 = SlickSimpleTestUtils.getTestCase("Rules", null);
         ObjectNode jsonNodes = testCase1.toObjectNode();
         SlickTestCase testCase2 = SlickTestCase.fromJsonNode(jsonNodes);
 
@@ -25,7 +25,7 @@ public class SlickSimpleDefinitionTests {
 
     @Test
     public void resultRoundTripSerializationTest() {
-        SlickResult result1 = SlickSimpleTestUtils.getResult("Blah", "1234");
+        SlickResult result1 = SlickSimpleTestUtils.getResult("Rules", "1234");
         ObjectNode jsonNodes = result1.toObjectNode();
         SlickResult result2 = SlickResult.fromJsonNode(jsonNodes);
 
@@ -34,7 +34,7 @@ public class SlickSimpleDefinitionTests {
 
     @Test
     public void testRunRoundTripSerializationTest() {
-        SlickTestRun testRun1 = SlickSimpleTestUtils.getTestRun("Blah", "1234");
+        SlickTestRun testRun1 = SlickSimpleTestUtils.getTestRun("Rules", "1234");
         ObjectNode jsonNodes = testRun1.toObjectNode();
         SlickTestRun testRun2 = SlickTestRun.fromJsonNode(jsonNodes);
 
