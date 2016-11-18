@@ -18,7 +18,6 @@ public class SlickResultRule extends TestWatcher {
 
     private ArrayList<SlickLog> logs = Lists.newArrayList();
     private String logType = "android";
-    private Description description;
     private SlickMetaData metaData;
     private SlickResult result;
     private String key;
@@ -26,7 +25,6 @@ public class SlickResultRule extends TestWatcher {
     @Override
     protected void starting(Description description) {
         if (description.isTest()) {
-            this.description = description;
             this.metaData = description.getAnnotation(SlickMetaData.class);
             this.key = (metaData.automationKey().length() == 0) ? metaData.automationKey() : metaData.automationId();
 
@@ -65,12 +63,6 @@ public class SlickResultRule extends TestWatcher {
         // Files
     }
 
-    private void updateResult(SlickResultStatus status) {
-        System.out.println("Updating the Result: " + status.toString());
-        this.result.setStatus(status);
-        this.suite.updateResults(Lists.newArrayList(this.result));
-    }
-
     public void info(String message) {
         this.logIt(message, "INFO");
     }
@@ -94,6 +86,12 @@ public class SlickResultRule extends TestWatcher {
                 .addExceptionMessage(exceptionMessage)
                 .build();
         this.logs.add(log);
+    }
+
+    private void updateResult(SlickResultStatus status) {
+        System.out.println("Updating the Result: " + status.toString());
+        this.result.setStatus(status);
+        this.suite.updateResults(Lists.newArrayList(this.result));
     }
 
 }
