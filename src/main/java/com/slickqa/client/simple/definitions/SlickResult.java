@@ -44,6 +44,14 @@ public class SlickResult {
         this.id = id;
     }
 
+    public SlickResultStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SlickResultStatus status) {
+        this.status = status;
+    }
+
     public SlickTestCase getTestCase() {
         return testCase;
     }
@@ -60,9 +68,7 @@ public class SlickResult {
         return finished;
     }
 
-    public SlickResultStatus getStatus() {
-        return status;
-    }
+
 
     public ObjectNode toObjectNode() {
         ObjectMapper mapper = JsonUtil.getObjectMapper();

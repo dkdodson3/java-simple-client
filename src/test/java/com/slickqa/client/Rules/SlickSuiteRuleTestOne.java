@@ -2,8 +2,7 @@ package com.slickqa.client.Rules;
 
 import com.slickqa.client.annotations.SlickMetaData;
 import com.slickqa.client.annotations.Step;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -11,14 +10,6 @@ import org.junit.Test;
  * Created by Keith on 11/15/16.
  */
 public class SlickSuiteRuleTestOne {
-    @ClassRule
-    public static SlickSuiteRule slickSuite = new SlickSuiteRule();
-
-    @BeforeClass
-    public static void setup() {
-        slickSuite.addResults();
-    }
-
     @Rule
     public SlickResultRule result = new SlickResultRule();
 
@@ -34,11 +25,10 @@ public class SlickSuiteRuleTestOne {
                     @Step(step = "31", expectation = "41")
             }
     )
-    @Test public void verifyRuleTest1() throws NoSuchMethodException, NoSuchFieldException {
-        SlickMetaData metaData = result.getMetaData();
+    @Test
+    public void verifyRuleTest1() {
+        Assert.assertTrue(true);
     }
-
-
 
     @SlickMetaData(
             title = "SlickResultRule2",
@@ -52,8 +42,9 @@ public class SlickSuiteRuleTestOne {
                     @Step(step = "32", expectation = "42")
             }
     )
-    @Test public void verifyRuleTest2() throws NoSuchMethodException, NoSuchFieldException {
-        SlickMetaData metaData = result.getMetaData();
+    @Test
+    public void verifyRuleTest2() throws NoSuchMethodException, NoSuchFieldException {
+        Assert.assertTrue(false);
     }
 
 
