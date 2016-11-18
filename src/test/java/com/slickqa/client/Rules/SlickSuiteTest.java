@@ -20,5 +20,4 @@ public class SlickSuiteTest {
         SlickController suite = SlickController.INSTANCE;
         suite.createSuiteResults(SlickSuiteTest.class);
     }
-
 }

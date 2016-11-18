@@ -28,10 +28,12 @@ public class SlickController {
     private final AtomicBoolean initialized = new AtomicBoolean();
     private ConcurrentHashMap<String, SlickResult> resultMap = new ConcurrentHashMap<>();
     private Properties prop = new Properties();
-    private SlickTestRun slickTestRun;
     private SlickSimpleClient client;
+    private String testRunId;
 
     public SlickController() {
+        // Starting everything needed for the controller
+        // Only allowing this to be run once and then used in multiple places
         if (!this.initialized.get()) {
             loadProperties();
             createClient();
@@ -45,6 +47,7 @@ public class SlickController {
     }
 
     public void createSuiteResults(Class suiteClass) {
+        // Find and create results for all the Test Methods in the SuiteClass
         ArrayList<SlickResult> slickResults = new ArrayList<>();
         Suite.SuiteClasses annotation = (Suite.SuiteClasses) suiteClass.getAnnotation(Suite.SuiteClasses.class);
         ArrayList<Class<?>> suiteClasses = Lists.newArrayList(annotation.value());
@@ -61,21 +64,37 @@ public class SlickController {
     }
 
     public void createMethodResult(SlickMetaData metaData) {
+        // Creates result for a single Test Method
+        // This is used when tests are not being run as part of a suite
         System.out.println("Creating Result for Method");
-        ArrayList<SlickResult> slickResults = new ArrayList<>();
-        slickResults.add(createResult(metaData));
-        this.updateResults(slickResults);
+        SlickResult result = createResult(metaData);
+        this.updateResults(Lists.newArrayList(result));
     }
 
-    public void updateResult(SlickResult result) {
-        updateResults(Lists.newArrayList(result));
+    public void updateResults(ArrayList<SlickResult> resultList) {
+        // Sending the results to the client
+        // Adding returned results to the ResultMap by either the AutomationKey or the AutomationId
+        try {
+            String testRunId = this.testRunId;
+            ArrayList<SlickResult> results = this.client.addResults(testRunId, resultList);
+            for (SlickResult result : results) {
+                String key = (result.getTestCase().getAutomationKey().length() == 0) ? result.getTestCase().getAutomationKey() : result.getTestCase().getAutomationId();
+                this.getResultMap().put(key, result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void addLogs(String resultId, ArrayList<SlickLog> logs) {
-        client.addLogs(getTestRunId(), resultId, logs);
+        client.addLogs(this.testRunId,
+                resultId,
+                logs);
     }
 
     private void createClient() {
+        // Creating a specific client specified in the properties
+        // This allows for different implementations of SlickSimpleClient, including test implementations
         try {
             String className = prop.getProperty("client_class_name");
             System.out.println("Initializing client : " + className);
@@ -86,12 +105,14 @@ public class SlickController {
     }
 
     private void createTestRun() {
-        // Create new SlickTestRun item
+        // Create new SlickTestRun from properties
+        // Save off the TestRunId for later use
         SlickIdentity project = new SlickIdentity(prop.getProperty("project_name"), null);
         SlickIdentity release = new SlickIdentity(prop.getProperty("release_name", null), null);
         SlickIdentity build = new SlickIdentity(prop.getProperty("build_name", null), null);
         SlickIdentity testPlan = new SlickIdentity(prop.getProperty("test_plan_name", null), null);
         SlickIdentity testRun = new SlickIdentity(prop.getProperty("test_run_name", null), null);
+
         SlickTestRun slickTestRun = SlickTestRun.builder()
                 .addProject(project)
                 .addRelease(release)
@@ -100,18 +121,16 @@ public class SlickController {
                 .addTestRun(testRun)
                 .build();
 
-        if (this.slickTestRun == null)
-        {
-            try {
-
-                this.slickTestRun = client.addTestRun(slickTestRun);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            SlickTestRun retTestRun = client.addTestRun(slickTestRun);
+            this.testRunId = retTestRun.getTestRun().getId();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private void loadProperties() {
+        //Getting properties from a System Property
         String configFile = System.getProperty("slick.config");
         InputStream input = null;
         try {
@@ -130,34 +149,12 @@ public class SlickController {
         }
     }
 
-    private void updateResults(ArrayList<SlickResult> resultList) {
-        try {
-            ArrayList<SlickResult> results = this.client.addResults(getTestRunId(), resultList);
-            for (SlickResult result : results) {
-                String key = (result.getTestCase().getAutomationKey().length() == 0) ? result.getTestCase().getAutomationKey() : result.getTestCase().getAutomationId();
-                this.getResultMap().put(key, result);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String getTestRunId() {
-        return this.slickTestRun.getTestRun().getId();
-    }
-
-    private SlickResult createResult(SlickMetaData metaData) {
-        SlickTestCase testCase = this.buildSlickTestCaseFromMetaData(metaData);
-        SlickResult slickResult = this.buildResultFromMetaData(testCase);
-        return slickResult;
-    }
-
-    private ArrayList<Method> getTestMethods(ArrayList<Class<?>> suiteClasses) {
+    private ArrayList<Method> getTestMethods(ArrayList<Class<?>> klasses) {
+        // Getting Test Methods from Klasses that are passed in
         ArrayList<Method> testMethods = Lists.newArrayList();
 
-        // Get Test Methods
-        for (Class suiteClass : suiteClasses) {
-            for (Method method: suiteClass.getMethods()) {
+        for (Class klass : klasses) {
+            for (Method method: klass.getMethods()) {
                 if (method.getAnnotation(Test.class) != null) {
                     testMethods.add(method);
                 }
@@ -167,18 +164,14 @@ public class SlickController {
         return testMethods;
     }
 
-    private SlickResult buildResultFromMetaData(SlickTestCase testCase) {
-        return SlickResult.builder()
-                .addTestCase(testCase)
-                .build();
-    }
-
-    private SlickTestCase buildSlickTestCaseFromMetaData(SlickMetaData metaData) {
+    private SlickResult createResult(SlickMetaData metaData) {
+        // Building out the test case with the metadata and packaging it in a SlickResult
         ArrayList<SlickStep> steps = new ArrayList<>();
         for (Step step : metaData.steps()) {
             steps.add(new SlickStep(step.step(), step.expectation()));
         }
-        return SlickTestCase.builder()
+
+        SlickTestCase testCase = SlickTestCase.builder()
                 .addAutomationId(metaData.automationId())
                 .addAutomationKey(metaData.automationKey())
                 .addAutomationTool("Android")
@@ -187,5 +180,7 @@ public class SlickController {
                 .addFeature(metaData.feature())
                 .addName(metaData.title())
                 .build();
+
+        return SlickResult.builder().addTestCase(testCase).build();
     }
 }

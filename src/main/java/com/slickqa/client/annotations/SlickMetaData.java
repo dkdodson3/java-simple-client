@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Created by Keith on 11/11/16.
+ * This should be applied only to @Test methods.
+ * SlickMetaData will be used to create Results
  */
 @Retention( RetentionPolicy.RUNTIME )
 @Target( ElementType.METHOD )

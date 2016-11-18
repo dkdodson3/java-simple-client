@@ -43,7 +43,7 @@ public class SlickSuiteRuleTestOne {
             }
     )
     @Test
-    public void verifyRuleTest2() throws NoSuchMethodException, NoSuchFieldException {
+    public void verifyRuleTest2() {
         Assert.assertTrue(false);
     }
 

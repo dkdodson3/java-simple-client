@@ -18,11 +18,10 @@ public class SlickResultRule extends TestWatcher {
 
     private ArrayList<SlickLog> logs = Lists.newArrayList();
     private String logType = "android";
-
-    protected Description description;
-    protected SlickMetaData metaData;
-    protected String key;
-    protected String resultId;
+    private Description description;
+    private SlickMetaData metaData;
+    private SlickResult result;
+    private String key;
 
     @Override
     protected void starting(Description description) {
@@ -30,19 +29,13 @@ public class SlickResultRule extends TestWatcher {
             this.description = description;
             this.metaData = description.getAnnotation(SlickMetaData.class);
             this.key = (metaData.automationKey().length() == 0) ? metaData.automationKey() : metaData.automationId();
-            this.resultId = getResult().getId();
+
+            // Creating the Result if it is not in the ResultMap
+            if (this.suite.getResultMap().get(this.key) == null) {
+                this.suite.createMethodResult(this.metaData);
+            }
+            this.result = this.suite.getResultMap().get(this.key);
         }
-    }
-
-    public SlickResult getResult() {
-        SlickResult result = this.suite.getResultMap().get(this.key);
-
-        if (result == null) {
-            this.suite.createMethodResult(this.metaData);
-            result = this.suite.getResultMap().get(this.key);
-        }
-
-        return result;
     }
 
     @Override
@@ -65,26 +58,21 @@ public class SlickResultRule extends TestWatcher {
                 e.getMessage());
     }
 
-    private void updateResult(SlickResultStatus status) {
-        System.out.println("Updating the Result: " + status.toString());
-        SlickResult result = this.getResult();
-        result.setStatus(status);
-        this.suite.updateResult(result);
-    }
-
     @Override
     protected void finished(Description description) {
         System.out.println("Finished: " + description.getMethodName());
-        this.suite.addLogs(this.resultId, this.logs);
+        this.suite.addLogs(this.result.getId(), this.logs);
         // Files
+    }
+
+    private void updateResult(SlickResultStatus status) {
+        System.out.println("Updating the Result: " + status.toString());
+        this.result.setStatus(status);
+        this.suite.updateResults(Lists.newArrayList(this.result));
     }
 
     public void info(String message) {
         this.logIt(message, "INFO");
-    }
-
-    public void debug(String message) {
-        this.logIt(message, "DEBUG");
     }
 
     public void error(String message) {
