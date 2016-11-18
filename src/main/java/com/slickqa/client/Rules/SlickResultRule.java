@@ -1,4 +1,4 @@
-package com.slickqa.client.Rules;
+package com.slickqa.client.rules;
 
 import com.google.common.collect.Lists;
 import com.slickqa.client.annotations.SlickMetaData;

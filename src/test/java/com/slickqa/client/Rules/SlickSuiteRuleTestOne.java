@@ -1,4 +1,4 @@
-package com.slickqa.client.Rules;
+package com.slickqa.client.rules;
 
 import com.slickqa.client.annotations.SlickMetaData;
 import com.slickqa.client.annotations.Step;

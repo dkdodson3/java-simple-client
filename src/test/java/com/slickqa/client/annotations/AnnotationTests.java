@@ -32,7 +32,6 @@ public class AnnotationTests {
     public void verifyRuleTests() throws NoSuchMethodException {
         Method currentMethod = getClass().getMethod(testName.getMethodName());
         SlickMetaData metaData = currentMethod.getAnnotation(SlickMetaData.class);
-//        SlickMetaData metaData = foo.getMetaData();
         assertEquals(metaData.title(), "SlickResultRule");
         assertEquals(metaData.component(), "bar");
         assertEquals(metaData.feature(), "bob");
