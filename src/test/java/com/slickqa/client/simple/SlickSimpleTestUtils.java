@@ -1,6 +1,7 @@
 package com.slickqa.client.simple;
 
 import com.slickqa.client.simple.definitions.*;
+import com.slickqa.client.simple.impl.SlickSimpleClientFakeImpl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

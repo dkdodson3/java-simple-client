@@ -1,6 +1,5 @@
 package com.slickqa.client.rules;
 
-import com.google.common.collect.Lists;
 import com.slickqa.client.annotations.SlickMetaData;
 import com.slickqa.client.annotations.Step;
 import com.slickqa.client.simple.SlickSimpleClient;
@@ -17,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 
 /**
  * Created by Keith on 11/16/16.
@@ -50,7 +50,11 @@ public class SlickController {
         // Find and create results for all the Test Methods in the SuiteClass
         ArrayList<SlickResult> slickResults = new ArrayList<>();
         Suite.SuiteClasses annotation = (Suite.SuiteClasses) suiteClass.getAnnotation(Suite.SuiteClasses.class);
-        ArrayList<Class<?>> suiteClasses = Lists.newArrayList(annotation.value());
+        Class<?>[] values = annotation.value();
+        ArrayList<Class<?>> suiteClasses = new ArrayList<>();
+        for (Class<?> klass : values) {
+            suiteClasses.add(klass);
+        }
 
         for (Method method: this.getTestMethods(suiteClasses)) {
             SlickMetaData metaData = method.getAnnotation(SlickMetaData.class);
@@ -65,10 +69,9 @@ public class SlickController {
 
     public void createMethodResult(SlickMetaData metaData) {
         // Creates result for a single Test Method
-        // This is used when tests are not being run as part of a suite
+        // This is used when tests are not being run as part of a controller
         System.out.println("Creating Result for Method");
-        SlickResult result = createResult(metaData);
-        this.updateResults(Lists.newArrayList(result));
+       this.updateResult(createResult(metaData));
     }
 
     public void updateResults(ArrayList<SlickResult> resultList) {
@@ -86,10 +89,26 @@ public class SlickController {
         }
     }
 
+    public void updateResult(SlickResult result) {
+        ArrayList<SlickResult> results = new ArrayList<>();
+        results.add(result);
+        this.updateResults(results);
+    }
+
     public void addLogs(String resultId, ArrayList<SlickLog> logs) {
         client.addLogs(this.testRunId,
                 resultId,
                 logs);
+    }
+
+    public void addFiles(String resultId, ArrayList<SlickFile> files) {
+        try {
+            client.addFiles(this.testRunId,
+                    resultId,
+                    files);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createClient() {
@@ -98,7 +117,7 @@ public class SlickController {
         try {
             String className = prop.getProperty("client_class_name");
             System.out.println("Initializing client : " + className);
-            this.client = (SlickSimpleClient) ClassLoader.getSystemClassLoader().loadClass(className).newInstance();
+            this.client = (SlickSimpleClient) this.getClass().getClassLoader().loadClass(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -132,9 +151,16 @@ public class SlickController {
     private void loadProperties() {
         //Getting properties from a System Property
         String configFile = System.getProperty("slick.config");
+
         InputStream input = null;
         try {
-            input = new FileInputStream(new File(configFile));
+            if (configFile == null) {
+                ClassLoader classLoader = getClass().getClassLoader();
+                input = classLoader.getResourceAsStream("fake.properties");
+            } else {
+                input = new FileInputStream(new File(configFile));
+            }
+
             prop.load(input);
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -151,7 +177,7 @@ public class SlickController {
 
     private ArrayList<Method> getTestMethods(ArrayList<Class<?>> klasses) {
         // Getting Test Methods from Klasses that are passed in
-        ArrayList<Method> testMethods = Lists.newArrayList();
+        ArrayList<Method> testMethods = new ArrayList<>();
 
         for (Class klass : klasses) {
             for (Method method: klass.getMethods()) {
@@ -183,4 +209,6 @@ public class SlickController {
 
         return SlickResult.builder().addTestCase(testCase).build();
     }
+
+
 }

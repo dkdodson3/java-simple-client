@@ -14,12 +14,12 @@ import static com.slickqa.client.simple.utils.JsonUtil.mapper;
  * Created by Keith on 10/26/16.
  */
 public class SlickFile {
-    private final Path filePath;
+    private final String filePath;
     private final SlickIdentity identity;
     private Integer chunkSize;
     private String mimeType;
 
-    public SlickFile(@NonNull Path filePath, @NonNull SlickIdentity identity, Integer chunkSize, String mimeType) {
+    public SlickFile(@NonNull String filePath, @NonNull SlickIdentity identity, Integer chunkSize, String mimeType) {
         this.filePath = filePath;
         this.identity = identity;
         this.chunkSize = chunkSize;
@@ -34,7 +34,7 @@ public class SlickFile {
         this.mimeType = mimeType;
     }
 
-    public Path getFilePath() {
+    public String getFilePath() {
         return filePath;
     }
 

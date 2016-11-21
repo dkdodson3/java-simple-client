@@ -1,6 +1,5 @@
 package com.slickqa.client.simple.impl;
 
-import com.google.common.collect.Lists;
 import com.slickqa.client.simple.SlickSimpleClient;
 import com.slickqa.client.simple.definitions.*;
 
@@ -55,7 +54,7 @@ public class SlickSimpleClientFakeImpl implements SlickSimpleClient {
     @Override
     public ArrayList<SlickResult> addResults(String testRunId, ArrayList<SlickResult> results) throws IOException {
         System.out.println("Results");
-        ArrayList<SlickResult> retResults = Lists.newArrayList();
+        ArrayList<SlickResult> retResults = new ArrayList<>();
         for (SlickResult result: results) {
             if (result.getId() == null) {
                 result.setId(randomNumber(10));
@@ -82,7 +81,8 @@ public class SlickSimpleClientFakeImpl implements SlickSimpleClient {
         System.out.println("Files");
         for (SlickFile slickFile: slickFiles) {
             slickFile.getIdentity().setId(randomNumber(10));
-            System.out.println(slickFile.getIdentity().toObjectNode().textValue());
+            System.out.println("FilePath: " + slickFile.getFilePath());
+            System.out.println(slickFile.getIdentity().toObjectNode().toString());
         }
 
         return slickFiles;

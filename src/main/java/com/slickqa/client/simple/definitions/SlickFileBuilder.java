@@ -1,14 +1,12 @@
 package com.slickqa.client.simple.definitions;
 
-import java.nio.file.Path;
-
 public class SlickFileBuilder {
-    private Path filePath;
+    private String filePath;
     private SlickIdentity identity;
     private Integer chunkSize;
     private String mimeType;
 
-    public SlickFileBuilder addFilePath(Path filePath) {
+    public SlickFileBuilder addFilePath(String filePath) {
         this.filePath = filePath;
         return this;
     }

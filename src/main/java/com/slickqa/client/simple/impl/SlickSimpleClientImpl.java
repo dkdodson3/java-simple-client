@@ -211,7 +211,7 @@ public class SlickSimpleClientImpl implements SlickSimpleClient {
         WebTarget currentTarget = this.getTarget().path(path);
         Invocation.Builder request = currentTarget.request(MEDIA_TYPE);
 
-        File file = new File(slickFile.getFilePath().toString());
+        File file = new File(slickFile.getFilePath());
         FileInputStream stream = new FileInputStream(file);
 
         byte[] buffer = new byte[slickFile.getChunkSize()];

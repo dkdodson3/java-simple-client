@@ -1,39 +1,60 @@
 package com.slickqa.client.rules;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.slickqa.client.annotations.SlickMetaData;
-import com.slickqa.client.simple.definitions.SlickLog;
-import com.slickqa.client.simple.definitions.SlickResult;
-import com.slickqa.client.simple.definitions.SlickResultStatus;
+import com.slickqa.client.simple.definitions.*;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
  * Created by Keith on 11/14/16.
  */
 public class SlickResultRule extends TestWatcher {
-    public final SlickController suite = SlickController.INSTANCE;
+    public final SlickController controller = SlickController.INSTANCE;
 
     private ArrayList<SlickLog> logs = Lists.newArrayList();
     private String logType = "android";
-    private SlickMetaData metaData;
     private SlickResult result;
-    private String key;
+    private File tempDir;
 
     @Override
     protected void starting(Description description) {
         if (description.isTest()) {
-            this.metaData = description.getAnnotation(SlickMetaData.class);
-            this.key = (metaData.automationKey().length() == 0) ? metaData.automationKey() : metaData.automationId();
+            SlickMetaData metaData = description.getAnnotation(SlickMetaData.class);
+            String key = (metaData.automationKey().length() == 0) ? metaData.automationKey() : metaData.automationId();
 
             // Creating the Result if it is not in the ResultMap
-            if (this.suite.getResultMap().get(this.key) == null) {
-                this.suite.createMethodResult(this.metaData);
+            if (this.controller.getResultMap().get(key) == null) {
+                this.controller.createMethodResult(metaData);
             }
-            this.result = this.suite.getResultMap().get(this.key);
+            this.result = this.controller.getResultMap().get(key);
+
+            this.tempDir = Files.createTempDir();
+            tempDir.deleteOnExit();
         }
+    }
+
+    @Override
+    protected void finished(Description description) {
+        System.out.println("Finished: " + description.getMethodName());
+        this.controller.addLogs(this.result.getId(), this.logs);
+        ArrayList<SlickFile> files = new ArrayList<>();
+        for (File file: this.getTempDir().listFiles()) {
+
+            if (file.isFile()) {
+                SlickFile slickFile = SlickFile.builder()
+                        .addFilePath(file.getAbsolutePath())
+                        .addIdentity(new SlickIdentity(file.getName(), null))
+                        .build();
+                files.add(slickFile);
+
+            }
+        }
+        this.controller.addFiles(this.result.getId(), files);
     }
 
     @Override
@@ -56,11 +77,12 @@ public class SlickResultRule extends TestWatcher {
                 e.getMessage());
     }
 
-    @Override
-    protected void finished(Description description) {
-        System.out.println("Finished: " + description.getMethodName());
-        this.suite.addLogs(this.result.getId(), this.logs);
-        // Files
+    public File getTempDir() {
+        return this.tempDir;
+    }
+
+    public void setLogType(String logType) {
+        this.logType = logType;
     }
 
     public void info(String message) {
@@ -91,7 +113,7 @@ public class SlickResultRule extends TestWatcher {
     private void updateResult(SlickResultStatus status) {
         System.out.println("Updating the Result: " + status.toString());
         this.result.setStatus(status);
-        this.suite.updateResults(Lists.newArrayList(this.result));
+        this.controller.updateResult(this.result);
     }
 
 }
