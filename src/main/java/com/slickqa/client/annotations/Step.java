@@ -5,6 +5,6 @@ package com.slickqa.client.annotations;
  * Used to create steps for SlickMetaData
  */
 public @interface Step {
-    public String step();
-    public String expectation() default "NA";
+    String step();
+    String expectation() default "NA";
 }

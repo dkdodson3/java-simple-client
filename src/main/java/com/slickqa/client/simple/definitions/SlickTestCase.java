@@ -16,13 +16,13 @@ import java.util.List;
  */
 
 public class SlickTestCase {
-    private final String component;
-    private final String feature;
-    private final String automationId;
-    private final String automationKey;
-    private final String automationTool;
-    private final String name;
-    private final List<SlickStep> steps;
+    private String component;
+    private String feature;
+    private String automationId;
+    private String automationKey;
+    private String automationTool;
+    private String name;
+    private List<SlickStep> steps;
 
     public final static String MESSAGE_EMPTY_AUTOMATION = "Must have either automationId or automationKey";
 
@@ -44,6 +44,34 @@ public class SlickTestCase {
         this.automationId = automationId;
         this.automationKey = automationKey;
         this.automationTool = automationTool;
+        this.steps = steps;
+    }
+
+    public void setComponent(String component) {
+        this.component = component;
+    }
+
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
+
+    public void setAutomationId(String automationId) {
+        this.automationId = automationId;
+    }
+
+    public void setAutomationKey(String automationKey) {
+        this.automationKey = automationKey;
+    }
+
+    public void setAutomationTool(String automationTool) {
+        this.automationTool = automationTool;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSteps(List<SlickStep> steps) {
         this.steps = steps;
     }
 

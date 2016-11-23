@@ -11,7 +11,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         SlickSuiteRuleTestOne.class,
-        SlickSuiteRuleTestTwo.class
+        SlickSuiteRuleTestTwo.class,
+        SlickParamaterizedTest.class
 })
 public class SlickSuiteTest {
     @BeforeClass

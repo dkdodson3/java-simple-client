@@ -15,11 +15,11 @@ import java.lang.annotation.Target;
 public @interface SlickMetaData {
     String value = "";
 
-    public String title();
-    public String component() default value;
-    public String feature() default value;
-    public String automationId() default value;
-    public String automationKey() default value;
-    public String automationTool();
-    public Step[] steps();
+    String title();
+    String component() default value;
+    String feature() default value;
+    String automationId() default value;
+    String automationKey() default value;
+    String automationTool() default value;
+    Step[] steps();
 }

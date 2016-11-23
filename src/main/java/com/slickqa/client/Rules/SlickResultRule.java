@@ -6,6 +6,7 @@ import com.slickqa.client.annotations.SlickMetaData;
 import com.slickqa.client.simple.definitions.*;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,32 +16,55 @@ import java.util.ArrayList;
  */
 public class SlickResultRule extends TestWatcher {
     public final SlickController controller = SlickController.INSTANCE;
-
-    private ArrayList<SlickLog> logs = Lists.newArrayList();
-    private String logType = "android";
-    private SlickResult result;
-    private File tempDir;
+    protected String logType = "";
+    protected ArrayList<SlickLog> logs = Lists.newArrayList();
+    protected File tempDir;
+    protected SlickMetaData metaData;
+    protected SlickResult result;
 
     @Override
     protected void starting(Description description) {
         if (description.isTest()) {
-            SlickMetaData metaData = description.getAnnotation(SlickMetaData.class);
-            String key = (metaData.automationKey().length() == 0) ? metaData.automationKey() : metaData.automationId();
-
-            // Creating the Result if it is not in the ResultMap
-            if (this.controller.getResultMap().get(key) == null) {
-                this.controller.createMethodResult(metaData);
+            this.metaData = description.getAnnotation(SlickMetaData.class);
+            String parameter = this.getParameters(description);
+            String key;
+            if (parameter != null) {
+                key = (this.metaData.automationKey().length() == 0) ? this.metaData.automationKey() + "_" + parameter : metaData.automationId() + "_" + parameter;
+            } else {
+                key = (this.metaData.automationKey().length() == 0) ? this.metaData.automationKey() : metaData.automationId();
             }
+
+            this.result = this.controller.getResultMap().get(key);
+
+            // Update result with parameter if needed
+            // Create result with parameters if no result
+            if (getResult() != null) {
+                if (parameter != null) {
+                    this.controller.updateResult(getResult(), parameter);
+                }
+            } else {
+                this.controller.createMethodResult(metaData, parameter);
+            }
+
             this.result = this.controller.getResultMap().get(key);
 
             this.tempDir = Files.createTempDir();
-            tempDir.deleteOnExit();
+            this.tempDir.deleteOnExit();
         }
+    }
+
+    protected String getParameters(Description description) {
+        if (description.getTestClass().getAnnotation(RunWith.class) != null && description.getTestClass().getAnnotation(RunWith.class).value().getName().equals("org.junit.runners.Parameterized")) {
+            String name = description.getMethodName();
+            return name.substring(name.indexOf('['), name.length());//.replace("[", "").replace("]","");
+        }
+
+        return null;
     }
 
     @Override
     protected void finished(Description description) {
-        System.out.println("Finished: " + description.getMethodName());
+        this.controller.updateResult(this.result, null);
         this.controller.addLogs(this.result.getId(), this.logs);
         ArrayList<SlickFile> files = new ArrayList<>();
         for (File file: this.getTempDir().listFiles()) {
@@ -54,31 +78,59 @@ public class SlickResultRule extends TestWatcher {
 
             }
         }
-        this.controller.addFiles(this.result.getId(), files);
+        this.controller.addFiles(this.getResult().getId(), files);
     }
 
     @Override
     protected void succeeded(Description description) {
-        System.out.println("Test Succeeded: " + description.getMethodName());
-        this.updateResult(SlickResultStatus.PASS);
+        this.updateResultStatus(SlickResultStatus.PASS);
     }
 
     @Override
     protected void failed(Throwable e, Description description) {
-        System.out.println("Test Failed: " + description.getMethodName());
-        this.updateResult(SlickResultStatus.FAIL);
-        String message = "Failed in method: " + description.getMethodName();
+        this.updateResultStatus(SlickResultStatus.FAIL);
+        String message = "Failed: " + this.getMetaData().title();
+
+        StringBuilder stacktrace = new StringBuilder();
+        for (StackTraceElement traceElement : e.getStackTrace()) {
+            stacktrace.append(traceElement.toString());
+            stacktrace.append("\n");
+        }
+
         this.logIt(
                 message,
                 "ERROR",
                 this.logType,
-                e.getStackTrace().toString(),
+                stacktrace.toString(),
                 e.getStackTrace().getClass().getName(),
                 e.getMessage());
+        e.printStackTrace();
     }
 
     public File getTempDir() {
         return this.tempDir;
+    }
+
+    public SlickMetaData getMetaData() { return this.metaData; }
+
+    public SlickResult getResult() {
+        return this.result;
+    }
+
+    public SlickTestCase getTestCase() {
+        return this.getResult().getTestCase();
+    }
+
+    public void updateResult(SlickResult result) {
+        this.result = result;
+    }
+
+    public void updateTestCase(SlickTestCase testCase) {
+        this.getResult().setTestCase(testCase);
+    }
+
+    public void updateResultStatus(SlickResultStatus status) {
+        this.getResult().setStatus(status);
     }
 
     public void setLogType(String logType) {
@@ -110,10 +162,6 @@ public class SlickResultRule extends TestWatcher {
         this.logs.add(log);
     }
 
-    private void updateResult(SlickResultStatus status) {
-        System.out.println("Updating the Result: " + status.toString());
-        this.result.setStatus(status);
-        this.controller.updateResult(this.result);
-    }
+
 
 }

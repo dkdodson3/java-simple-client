@@ -16,10 +16,10 @@ import java.util.ArrayList;
 
 public class SlickResult {
     private String id;
-    private final SlickTestCase testCase;
-    private final String reason;
-    private final Long started;
-    private final Long finished;
+    private SlickTestCase testCase;
+    private String reason;
+    private Long started;
+    private Long finished;
     private SlickResultStatus status;
 
     public SlickResult(String id, SlickTestCase testCase, String reason, Long started, Long finished, SlickResultStatus status) {
@@ -38,6 +38,22 @@ public class SlickResult {
 
     public String getId() {
         return id;
+    }
+
+    public void setTestCase(SlickTestCase testCase) {
+        this.testCase = testCase;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public void setStarted(Long started) {
+        this.started = started;
+    }
+
+    public void setFinished(Long finished) {
+        this.finished = finished;
     }
 
     public void setId(String id) {

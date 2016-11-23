@@ -9,8 +9,8 @@ import com.slickqa.client.simple.utils.JsonUtil;
  * Created by Keith on 11/7/16.
  */
 public class SlickStep {
-    private final String name;
-    private final String expectedResults;
+    private String name;
+    private String expectedResults;
 
     public SlickStep(String name, String expectedResults) {
         this.name = name;
@@ -23,6 +23,14 @@ public class SlickStep {
 
     public String getExpectedResults() {
         return expectedResults;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setExpectedResults(String expectedResults) {
+        this.expectedResults = expectedResults;
     }
 
     public ObjectNode toObjectNode() {
