@@ -1,4 +1,4 @@
-package com.slickqa.client.rules;
+package com.slickqa.client.junit;
 
 import com.slickqa.client.annotations.SlickMetaData;
 import com.slickqa.client.annotations.Step;
@@ -23,11 +23,11 @@ public class SlickParamaterizedTest {
     @Parameters(name = "{0},{1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { "abc", "abc"},
+                { "abc1", "abc2"},
                 { "cba", "abc"},
                 { "abcddcba", "aabbccdd"},
-                { "a", "a"},
-                { "aaa", "aaa"}
+                { "a1", "a2"},
+                { "aaa1", "aaa2"}
         });
     }
 
@@ -47,8 +47,8 @@ public class SlickParamaterizedTest {
             automationId = "burp5",
             automationTool = "bike5",
             steps = {
-                    @Step(step = "15", expectation = "25"),
-                    @Step(step = "35", expectation = "45")
+                    @Step(step = "15{1}", expectation = "25"),
+                    @Step(step = "35{0}", expectation = "45")
             }
     )
     @Test

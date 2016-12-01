@@ -1,4 +1,4 @@
-package com.slickqa.client.rules;
+package com.slickqa.client.junit;
 
 
 /**
@@ -6,10 +6,9 @@ package com.slickqa.client.rules;
  */
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@RunWith(SlickSuite.class)
+@SlickSuite.SuiteClasses({
         SlickSuiteRuleTestOne.class,
         SlickSuiteRuleTestTwo.class,
         SlickParamaterizedTest.class
@@ -17,8 +16,5 @@ import org.junit.runners.Suite;
 public class SlickSuiteTest {
     @BeforeClass
     public static void setup() {
-        System.out.println("One Setup to Rule them All");
-        SlickController suite = SlickController.INSTANCE;
-        suite.createSuiteResults(SlickSuiteTest.class);
     }
 }

@@ -1,4 +1,4 @@
-package com.slickqa.client.rules;
+package com.slickqa.client.junit;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -15,17 +15,22 @@ import java.util.ArrayList;
  * Created by Keith on 11/14/16.
  */
 public class SlickResultRule extends TestWatcher {
-    public final SlickController controller = SlickController.INSTANCE;
-    protected String logType = "";
+    public SlickJunitController controller;
     protected ArrayList<SlickLog> logs = Lists.newArrayList();
     protected File tempDir;
     protected SlickMetaData metaData;
     protected SlickResult result;
 
+    protected void initController() {
+        controller = SlickJunitController.getInstance();
+    }
+
     @Override
     protected void starting(Description description) {
+        initController();
         if (description.isTest()) {
             this.metaData = description.getAnnotation(SlickMetaData.class);
+
             String parameter = this.getParameters(description);
             String key;
             if (parameter != null) {
@@ -36,17 +41,10 @@ public class SlickResultRule extends TestWatcher {
 
             this.result = this.controller.getResultMap().get(key);
 
-            // Update result with parameter if needed
-            // Create result with parameters if no result
-            if (getResult() != null) {
-                if (parameter != null) {
-                    this.controller.updateResult(getResult(), parameter);
-                }
-            } else {
+            if (getResult() == null) {
                 this.controller.createMethodResult(metaData, parameter);
+                this.result = this.controller.getResultMap().get(key);
             }
-
-            this.result = this.controller.getResultMap().get(key);
 
             this.tempDir = Files.createTempDir();
             this.tempDir.deleteOnExit();
@@ -64,7 +62,7 @@ public class SlickResultRule extends TestWatcher {
 
     @Override
     protected void finished(Description description) {
-        this.controller.updateResult(this.result, null);
+        this.controller.updateResult(this.result);
         this.controller.addLogs(this.result.getId(), this.logs);
         ArrayList<SlickFile> files = new ArrayList<>();
         for (File file: this.getTempDir().listFiles()) {
@@ -100,7 +98,7 @@ public class SlickResultRule extends TestWatcher {
         this.logIt(
                 message,
                 "ERROR",
-                this.logType,
+                getLogType(),
                 stacktrace.toString(),
                 e.getStackTrace().getClass().getName(),
                 e.getMessage());
@@ -133,10 +131,6 @@ public class SlickResultRule extends TestWatcher {
         this.getResult().setStatus(status);
     }
 
-    public void setLogType(String logType) {
-        this.logType = logType;
-    }
-
     public void info(String message) {
         this.logIt(message, "INFO");
     }
@@ -145,8 +139,12 @@ public class SlickResultRule extends TestWatcher {
         this.logIt(message, "ERROR");
     }
 
+    protected String getLogType() {
+        return "";
+    }
+
     private void logIt(String message, String level) {
-        this.logIt(message, level, this.logType, null, null, null);
+        this.logIt(message, level, getLogType(), null, null, null);
     }
 
     private void logIt(String message, String level, String loggerName, String stackTrace, String className, String exceptionMessage) {
@@ -161,7 +159,4 @@ public class SlickResultRule extends TestWatcher {
                 .build();
         this.logs.add(log);
     }
-
-
-
 }
