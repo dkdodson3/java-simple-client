@@ -5,7 +5,7 @@
   <artifactId>slickqa-java-client-simple</artifactId>
   <packaging>jar</packaging>
   <name>slickqa-java-client-simple</name>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <description>Java simple client api for the slick test management tool.</description>
   <url>http://github.com/slickqa/java-simple-client</url>
   <issueManagement>
