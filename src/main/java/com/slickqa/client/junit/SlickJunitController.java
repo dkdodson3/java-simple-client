@@ -126,7 +126,7 @@ public class SlickJunitController {
         }
     }
 
-    protected Properties getProperties() {
+    public Properties getProperties() {
         if (this.properties == null) {
             this.properties = System.getProperties();
         }
